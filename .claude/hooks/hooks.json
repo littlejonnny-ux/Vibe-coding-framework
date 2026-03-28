@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/scripts/session-start.js"
+          }
+        ],
+        "description": "Load previous session context and detect project type"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/scripts/suggest-compact.js"
+          }
+        ],
+        "description": "Suggest manual compaction at logical intervals"
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/scripts/pre-compact.js"
+          }
+        ],
+        "description": "Save state before context compaction"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/scripts/session-end.js",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Persist session state after each response"
+      }
+    ]
+  }
+}
