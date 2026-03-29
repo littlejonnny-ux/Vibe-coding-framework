@@ -12,7 +12,7 @@
 | **Skill-файл** (.md в .claude/skills/) | Функции нет как плагина, или нужна адаптация под workflow | Ручные | Полный (можно редактировать) |
 | **Agent-файл** (.md в .claude/agents/) | Нужен отдельный subagent с ограниченным scope | Ручные | Полный |
 | **MCP** | Внешний сервис, часто используемый в контексте | Автоматические | Настройка через .claude.json |
-| **CLI** | Замена MCP для освобождения контекстного окна | — | Через bash/scripts |
+| **CLI** | Альтернатива MCP для проектов без подключённых сервисов | — | Через bash/scripts |
 
 ---
 
@@ -58,17 +58,23 @@
 
 ---
 
-## MCP vs CLI
+## MCP-серверы
 
-| Сервис | MCP | CLI-замена | Рекомендация |
+На Max Plan с Opus (1M контекст) overhead от MCP descriptions составляет 0.2–0.3% контекстного окна — незначительно. MCP предпочтительнее CLI: структурированные данные, меньше парсинга, меньше ошибок.
+
+| Сервис | Тип | Конфигурация | Scope |
 |---|---|---|---|
-| GitHub | @modelcontextprotocol/server-github | `gh` CLI | **CLI** — освобождает контекстное окно для качества |
-| Supabase | @supabase/mcp-server-supabase | проектные скрипты db.js | **CLI** — освобождает контекстное окно для качества |
-| Vercel | mcp.vercel.com | auto-deploy через git push | **Не нужен** — push → auto-deploy |
-| Context7 | — | Plugin context7 | **Plugin** (не MCP) |
-| Playwright | @playwright/mcp | Plugin или CLI | **По необходимости** (ENT tier) |
+| GitHub | MCP (глобальный) | `~/.claude.json` → mcpServers → github | Все репозитории |
+| Supabase | MCP (глобальный) | `~/.claude.json` → mcpServers → supabase | Все проекты (без project_ref) |
+| Context7 | Plugin | `/plugin install context7@claude-plugins-official` | Глобальный |
+| Vercel | Не нужен | auto-deploy через git push | — |
+| Playwright | MCP (по необходимости) | Добавить в проектный .claude.json | ENTERPRISE tier |
 
-**Правило:** Не более 10 MCP одновременно. Не более 80 tools активных. Отключать неиспользуемые через `disabledMcpServers` в проектном .claude/settings.json.
+**Правила:**
+- Не более 10 MCP одновременно (качество контекста)
+- Не более 80 tools активных
+- Неиспользуемые в конкретном проекте — отключать через `disabledMcpServers` в проектном `.claude/settings.json`
+- При 1M контексте (Opus Max Plan) 3–4 MCP — абсолютно нормально
 
 ---
 

@@ -70,10 +70,11 @@ Plugins устанавливаются один раз. Их descriptions зан
 
 ---
 
-## Что НЕ использовать как MCP (замена CLI)
+## MCP-серверы (установлены глобально)
 
-| Вместо MCP | Используем | Причина |
+| MCP | Scope | Назначение |
 |---|---|---|
-| GitHub MCP | `gh` CLI | Освобождает контекстное окно для качества |
-| Supabase MCP | проектные скрипты db.js / db-schema.js | Освобождает контекстное окно для качества |
-| Vercel MCP | auto-deploy через git push | Не нужен — push запускает auto-deploy |
+| GitHub | Все репозитории | PR management, issues, code search, review |
+| Supabase | Все проекты | Интроспекция схемы, SQL, auth, storage, migrations |
+
+На Max Plan с 1M контекстом overhead от MCP descriptions незначителен (0.2–0.3%). MCP предпочтительнее CLI — структурированные данные, богатый API, меньше ошибок парсинга.
