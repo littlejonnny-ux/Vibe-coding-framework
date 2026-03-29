@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(for dir:*)",
       "Bash(do touch:*)",
@@ -35,7 +36,9 @@
       "mcp__supabase__reset_branch",
       "mcp__supabase__rebase_branch",
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__plugin_context7_context7__query-docs"
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-start.js''\\)\")",
+      "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-end.js''\\)\")"
     ]
   }
 }
