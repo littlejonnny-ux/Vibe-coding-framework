@@ -9,7 +9,8 @@
 ## Настройки Claude Code
 
 ```json
-// ~/.claude/settings.json
+// User-level: ~/.claude.json (Windows: %USERPROFILE%\.claude.json)
+// Project-level: .claude/settings.local.json
 {
   "model": "claude-opus-4-6",
   "env": {
