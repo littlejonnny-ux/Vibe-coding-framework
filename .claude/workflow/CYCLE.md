@@ -50,6 +50,12 @@ Claude Code: пишет/обновляет код
 [Если бизнес-логика / серверные API routes]
   → Пишет unit-тесты (tdd-workflow)
   ↓
+[Если build/typecheck/test fails]
+  → Активирует build-error-resolver agent
+  → Error Recovery Protocol (rules/common/development-workflow.md):
+    Attempt 1–2: normal fix. Attempt 3: pause + rethink.
+    After 3 fails: STOP, describe problem, propose alternatives, ask user.
+  ↓
 PRE-COMMIT ЧЕКЛИСТ:
   1. npm run lint → исправить errors, warnings
   2. npm run typecheck → исправить type errors (если TypeScript)

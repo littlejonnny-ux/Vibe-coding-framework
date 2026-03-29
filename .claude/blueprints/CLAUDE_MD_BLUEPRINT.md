@@ -109,6 +109,12 @@ src/
 [команды установки, запуска, сборки]
 ```
 
+## CI
+[STANDARD+ только]
+GitHub Actions: `.github/workflows/ci.yml`
+Pipeline: lint → typecheck → test → build
+[ENTERPRISE: branch protection enabled, CI обязателен для merge]
+
 ## Git
 - Ветки: `feature/название` для фич, `fix/описание` для исправлений
 - Коммиты на английском: feat:, fix:, refactor:, docs:, test:, chore:
@@ -156,6 +162,59 @@ src/
 | State management | TanStack Query (server state) + useState/useReducer (local state) |
 
 Claude Code указывает выбранный вариант и причину в комментарии рядом с секцией «Стек».
+
+---
+
+## CI Pipeline (STANDARD+ тир — генерируется автоматически)
+
+При инициализации STANDARD+ проекта Claude Code создаёт `.github/workflows/ci.yml`.
+
+### Базовый шаблон (Next.js + TypeScript)
+
+```yaml
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: TypeCheck
+        run: npx tsc --noEmit
+      - name: Test
+        run: npm run test -- --run
+      - name: Build
+        run: npm run build
+```
+
+### Адаптация по стеку
+
+| Стек | Адаптация |
+|---|---|
+| pnpm | `pnpm install --frozen-lockfile`, cache: 'pnpm' |
+| yarn | `yarn --frozen-lockfile`, cache: 'yarn' |
+| Jest вместо Vitest | `npm run test -- --ci` |
+| Playwright (ENTERPRISE) | Отдельный job `e2e:` с `npx playwright install --with-deps` |
+
+### Правила
+
+- CI генерируется один раз при инициализации, далее обновляется по запросу
+- STANDARD: CI информационный — Claude Code мёржит через `gh pr merge` независимо от CI
+- ENTERPRISE: CI обязателен — настроить branch protection, merge только при зелёном CI
+- Файл `.github/workflows/ci.yml` включается в первый коммит проекта
 
 ---
 

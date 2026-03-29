@@ -101,8 +101,9 @@ Hooks настраиваются через `.claude/hooks/hooks.json`. Скри
 - [ ] Установить 5 plugins
 - [ ] Настроить hooks (hooks.json + скрипты)
 - [ ] Настроить settings.json (model, tokens, autocompact)
-- [ ] Создать базовый CI: lint → typecheck → test → build
+- [ ] Создать `.github/workflows/ci.yml` по шаблону из CLAUDE_MD_BLUEPRINT.md
 
 ### ENTERPRISE (в дополнение к STANDARD)
 - [ ] Установить дополнительные plugins (Playwright, Ralph Loop)
-- [ ] Полный CI pipeline с branch protection
+- [ ] Расширить CI: добавить E2E тесты (Playwright job)
+- [ ] Настроить branch protection: require CI pass before merge

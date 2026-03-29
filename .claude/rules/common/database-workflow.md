@@ -15,9 +15,10 @@ Any schema change (ALTER, CREATE, DROP) must follow ALL steps. Skipping is prohi
    - If dependent data or code exists — migrate data and update code FIRST
    - Only then execute the destructive operation
    - NEVER drop a column/table that code references
-5. **Execute SQL**
-6. **Verification** — Read schema again, confirm result matches expectation
-7. **Update code** — Adapt code to new schema (if needed), in the SAME commit
+5. **Create rollback SQL** — Write reverse migration, save to `supabase/rollbacks/` directory (STANDARD+ tier, see Migration Rollback section)
+6. **Execute SQL**
+7. **Verification** — Read schema again, confirm result matches expectation
+8. **Update code** — Adapt code to new schema (if needed), in the SAME commit
 
 ## Automatic Safeguards (mandatory, no exceptions)
 
@@ -35,6 +36,47 @@ Any schema change (ALTER, CREATE, DROP) must follow ALL steps. Skipping is prohi
 4. Commit code
 
 Code expecting a non-existent schema must NEVER reach production.
+
+## Migration Rollback (STANDARD+ tier)
+
+Every schema migration MUST have a corresponding rollback plan.
+
+### Before Executing Migration
+
+1. **Create rollback SQL file** — Write the reverse operation:
+   - `ALTER TABLE ADD COLUMN` → rollback: `ALTER TABLE DROP COLUMN`
+   - `CREATE TABLE` → rollback: `DROP TABLE` (exception to prohibition — only in rollback context)
+   - `ALTER COLUMN TYPE` → rollback: `ALTER COLUMN TYPE` back to original
+   - `CREATE INDEX` → rollback: `DROP INDEX`
+   - `ADD CONSTRAINT` → rollback: `DROP CONSTRAINT`
+
+2. **Save rollback file** — Store as `supabase/rollbacks/YYYY-MM-DD-description-rollback.sql`
+
+3. **Test rollback mentally** — Verify that rollback SQL would correctly reverse the change without data loss.
+
+### Rollback File Format
+
+```sql
+-- Rollback for: [description of forward migration]
+-- Date: [YYYY-MM-DD]
+-- Forward migration: [filename or description]
+-- WARNING: Execute only if forward migration needs to be reversed.
+-- Data impact: [describe any data that would be lost]
+
+[rollback SQL statements]
+```
+
+### When to Execute Rollback
+
+- ONLY by explicit user request
+- ONLY when verification shows unexpected results AND user confirms
+- NEVER automatically
+
+### Rollback Prohibitions
+
+- Do NOT rollback if new data has been written using the new schema (data loss risk)
+- Do NOT rollback across multiple migrations at once — one at a time
+- Do NOT rollback auth schema changes — managed through Supabase Dashboard only
 
 ## Absolute Prohibitions
 

@@ -112,3 +112,7 @@ npx eslint . --fix
 ---
 
 **Remember**: Fix the error, verify the build passes, move on. Speed and precision over perfection.
+
+## Error Recovery Escalation
+
+If the same error (or closely related errors) persists after 3 fix attempts — follow the Error Recovery Protocol in `rules/common/development-workflow.md`. Do NOT continue fixing indefinitely. STOP and report to user with alternative approaches.
