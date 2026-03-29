@@ -27,7 +27,7 @@ Claude Code читает этот документ в начале каждой 
 │   ├── CYCLE.md                     # Полный цикл задачи по тирам
 │   ├── RETROSPECTIVE.md             # Post-merge ретроспектива
 │   ├── LEARNED_OVERRIDES.md         # Накопленные маркеры (растёт)
-│   ├── TOKEN_OPTIMIZATION.md        # Model routing, compaction, context management
+│   ├── CONTEXT_MANAGEMENT.md         # Context quality, compaction, usage limits
 │   ├── ARCHITECTURE_PRINCIPLES.md   # 11 принципов кода (frontend + backend)
 │   └── PLUGINS_AND_TOOLS.md         # Plugins, skill-файлы, MCP, commands, hooks
 ├── blueprints/                      # Шаблоны-генераторы
@@ -110,7 +110,7 @@ Production-приложения, внутренние инструменты, MV
 | Цикл задачи | `workflow/CYCLE.md` | При выполнении задачи |
 | Ретроспектива | `workflow/RETROSPECTIVE.md` | После merge |
 | Накопленный опыт | `workflow/LEARNED_OVERRIDES.md` | При определении набора инструментов |
-| Токены и контекст | `workflow/TOKEN_OPTIMIZATION.md` | При старте сессии и при предупреждениях о контексте |
+| Контекст и performance | `workflow/CONTEXT_MANAGEMENT.md` | При старте сессии и при предупреждениях о контексте |
 | Архитектура кода | `workflow/ARCHITECTURE_PRINCIPLES.md` | При написании кода |
 | Plugins и инструменты | `workflow/PLUGINS_AND_TOOLS.md` | При инициализации проекта |
 | Blueprint CLAUDE.md | `blueprints/CLAUDE_MD_BLUEPRINT.md` | При создании нового проекта |

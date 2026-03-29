@@ -25,7 +25,7 @@ Skills загружаются в контекст только при актив
 | 4 | build-error-resolver | ECC | sonnet | ALL | Исправление ошибок сборки: npm run build failed |
 | 5 | database-reviewer | ECC | sonnet | STD+ | Supabase queries, RLS, миграции, N+1, unbounded queries |
 
-Agents — это отдельные экземпляры Claude Code с ограниченным scope. Каждый вызов агента = отдельный расход токенов. Вызывать только по триггеру.
+Agents — это отдельные экземпляры Claude Code с ограниченным scope. Каждый вызов агента расходует сообщения из usage limit. Вызывать только по триггеру.
 
 ### Правила делегирования агенту
 
