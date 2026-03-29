@@ -12,7 +12,7 @@
 | **Skill-файл** (.md в .claude/skills/) | Функции нет как плагина, или нужна адаптация под workflow | Ручные | Полный (можно редактировать) |
 | **Agent-файл** (.md в .claude/agents/) | Нужен отдельный subagent с ограниченным scope | Ручные | Полный |
 | **MCP** | Внешний сервис, часто используемый в контексте | Автоматические | Настройка через .claude.json |
-| **CLI** | Замена MCP для экономии токенов | — | Через bash/scripts |
+| **CLI** | Замена MCP для освобождения контекстного окна | — | Через bash/scripts |
 
 ---
 
@@ -31,7 +31,7 @@
 # /plugin install playwright@...                      # E2E тестирование
 ```
 
-**Правило:** Не более 5–6 plugins одновременно. Каждый потребляет токены на descriptions.
+**Правило:** Не более 5–6 plugins одновременно. Descriptions каждого plugin занимают место в контекстном окне, влияя на качество ответов.
 
 ---
 
@@ -51,10 +51,10 @@
 | Agent | Файл | Модель | Тир |
 |---|---|---|---|
 | planner | `.claude/agents/planner.md` | opus | STD+ |
-| code-reviewer | `.claude/agents/code-reviewer.md` | sonnet | STD+ |
-| security-reviewer | `.claude/agents/security-reviewer.md` | sonnet | STD+ |
-| build-error-resolver | `.claude/agents/build-error-resolver.md` | sonnet | ALL |
-| database-reviewer | `.claude/agents/database-reviewer.md` | sonnet | STD+ |
+| code-reviewer | `.claude/agents/code-reviewer.md` | opus | STD+ |
+| security-reviewer | `.claude/agents/security-reviewer.md` | opus | STD+ |
+| build-error-resolver | `.claude/agents/build-error-resolver.md` | opus | ALL |
+| database-reviewer | `.claude/agents/database-reviewer.md` | opus | STD+ |
 
 ---
 
@@ -62,8 +62,8 @@
 
 | Сервис | MCP | CLI-замена | Рекомендация |
 |---|---|---|---|
-| GitHub | @modelcontextprotocol/server-github | `gh` CLI | **CLI** — экономия ~2000 токенов |
-| Supabase | @supabase/mcp-server-supabase | проектные скрипты db.js | **CLI** — экономия ~3000 токенов |
+| GitHub | @modelcontextprotocol/server-github | `gh` CLI | **CLI** — освобождает контекстное окно для качества |
+| Supabase | @supabase/mcp-server-supabase | проектные скрипты db.js | **CLI** — освобождает контекстное окно для качества |
 | Vercel | mcp.vercel.com | auto-deploy через git push | **Не нужен** — push → auto-deploy |
 | Context7 | — | Plugin context7 | **Plugin** (не MCP) |
 | Playwright | @playwright/mcp | Plugin или CLI | **По необходимости** (ENT tier) |
