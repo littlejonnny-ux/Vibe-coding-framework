@@ -1,21 +1,15 @@
 # Performance Optimization
 
-## Model Selection Strategy
+## Model Selection
 
-**Haiku 4.5** (90% of Sonnet capability, 3x cost savings):
-- Lightweight agents with frequent invocation
-- Pair programming and code generation
-- Worker agents in multi-agent systems
+See `workflow/MODEL_ROUTING_GUIDE.md` for the authoritative model routing table.
 
-**Sonnet 4.6** (Best coding model):
-- Main development work
-- Orchestrating multi-agent workflows
-- Complex coding tasks
-
-**Opus 4.5** (Deepest reasoning):
-- Complex architectural decisions
-- Maximum reasoning requirements
-- Research and analysis tasks
+Quick reference:
+- **Default session model:** Sonnet (set in settings.local.json)
+- **Planner agent:** Opus (architectural decisions requiring deep reasoning)
+- **All other agents:** Sonnet (code-reviewer, security-reviewer, build-error-resolver, database-reviewer)
+- **Subagents (Task tool):** Haiku (CLAUDE_CODE_SUBAGENT_MODEL in settings.local.json)
+- **MAX_THINKING_TOKENS:** 10000 (cap in settings.local.json, override per-session: `export MAX_THINKING_TOKENS=31999`)
 
 ## Context Window Management
 
@@ -30,22 +24,6 @@ Lower context sensitivity tasks:
 - Documentation updates
 - Simple bug fixes
 
-## Extended Thinking + Plan Mode
-
-Extended thinking is enabled by default, reserving up to 31,999 tokens for internal reasoning.
-
-Control extended thinking via:
-- **Toggle**: Option+T (macOS) / Alt+T (Windows/Linux)
-- **Config**: Set `alwaysThinkingEnabled` in user-level config (`~/.claude.json`)
-- **Budget cap**: `export MAX_THINKING_TOKENS=10000`
-- **Verbose mode**: Ctrl+O to see thinking output
-
-For complex tasks requiring deep reasoning:
-1. Ensure extended thinking is enabled (on by default)
-2. Enable **Plan Mode** for structured approach
-3. Use multiple critique rounds for thorough analysis
-4. Use split role sub-agents for diverse perspectives
-
 ## Build Troubleshooting
 
 If build fails:
@@ -53,3 +31,4 @@ If build fails:
 2. Analyze error messages
 3. Fix incrementally
 4. Verify after each fix
+5. If 3 attempts fail — follow Error Recovery Protocol in `rules/common/development-workflow.md`
