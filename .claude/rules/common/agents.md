@@ -20,6 +20,17 @@ No user prompt needed:
 3. Build or type errors — use **build-error-resolver** agent
 4. Auth, API routes, sensitive data — use **security-reviewer** agent
 
+## Iterative Retrieval (проверка результатов субагентов)
+
+Когда orchestrator делегирует задачу через Task — оценить возврат перед использованием:
+
+1. **Получить результат** от sub-agent
+2. **Оценить:** полнота, точность, достаточность для принятия решения
+3. **Если недостаточно:** переформулировать запрос с уточнением + передать предыдущий ответ
+4. **Максимум 3 цикла.** После 3-го — принять лучший результат с оговорками
+
+**Ключевое правило:** всегда передавать objective context (ЗАЧЕМ нужен ответ), не только query (ЧТО найти).
+
 ## Parallel Task Execution
 
 ALWAYS use parallel Task execution for independent operations:
