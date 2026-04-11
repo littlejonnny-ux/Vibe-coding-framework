@@ -121,8 +121,9 @@ Common sources of duplicate context:
 - Multiple skills covering overlapping domains
 
 ### Context Optimization Tools
-- `token-optimizer` MCP — Automated 95%+ token reduction via content deduplication
-- `context-mode` — Context virtualization (315KB to 5.4KB demonstrated)
+- `/compact` с summary — встроенная команда Claude Code для сжатия контекста
+- `suggest-compact.js` hook — автоматические подсказки при достижении порога tool calls
+- `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50` — autocompact при 50% заполнения контекста
 
 ## Related
 

@@ -1,6 +1,6 @@
 ---
 name: search-first
-description: Research-before-coding workflow. Search for existing tools, libraries, and patterns before writing custom code. Invokes the researcher agent.
+description: Research-before-coding workflow. Search for existing tools, libraries, and patterns before writing custom code. Use before implementing new features.
 origin: ECC
 ---
 
@@ -24,7 +24,7 @@ Use this skill when:
 │     Define what functionality is needed      │
 │     Identify language/framework constraints  │
 ├─────────────────────────────────────────────┤
-│  2. PARALLEL SEARCH (researcher agent)      │
+│  2. PARALLEL SEARCH                         │
 │     ┌──────────┐ ┌──────────┐ ┌──────────┐  │
 │     │  npm /   │ │  MCP /   │ │  GitHub / │  │
 │     │  PyPI    │ │  Skills  │ │  Web      │  │
@@ -67,20 +67,16 @@ Before writing a utility or adding functionality, mentally run through:
 3. Is there a skill for this? → Check `~/.claude/skills/`
 4. Is there a GitHub implementation/template? → Run GitHub code search for maintained OSS before writing net-new code
 
-### Full Mode (agent)
+### Full Mode (самостоятельно)
 
-For non-trivial functionality, launch the researcher agent:
+Для нетривиальной функциональности выполни полный поиск:
 
-```
-Task(subagent_type="general-purpose", prompt="
-  Research existing tools for: [DESCRIPTION]
-  Language/framework: [LANG]
-  Constraints: [ANY]
+1. `gh search repos [описание]` и `gh search code [ключевые слова]`
+2. Поиск в npm/PyPI по ключевым словам
+3. Context7 для документации библиотек
+4. Веб-поиск как последний шаг
 
-  Search: npm/PyPI, MCP servers, Claude Code skills, GitHub
-  Return: Structured comparison with recommendation
-")
-```
+Оформи результаты в виде сравнительной таблицы с рекомендацией.
 
 ## Search Shortcuts by Category
 
@@ -104,25 +100,16 @@ Task(subagent_type="general-purpose", prompt="
 - Markdown processing → `remark`, `unified`, `markdown-it`
 - Image optimization → `sharp`, `imagemin`
 
-## Integration Points
+## Интеграция с другими механизмами
 
-### With planner agent
-The planner should invoke researcher before Phase 1 (Architecture Review):
-- Researcher identifies available tools
-- Planner incorporates them into the implementation plan
-- Avoids "reinventing the wheel" in the plan
+### С агентом planner
+Перед активацией planner agent выполни search-first:
+- Найди существующие инструменты и библиотеки
+- Передай результаты в planner для учёта в плане реализации
+- Избегай «изобретения велосипеда» на этапе планирования
 
-### With architect agent
-The architect should consult researcher for:
-- Technology stack decisions
-- Integration pattern discovery
-- Existing reference architectures
-
-### With iterative-retrieval skill
-Combine for progressive discovery:
-- Cycle 1: Broad search (npm, PyPI, MCP)
-- Cycle 2: Evaluate top candidates in detail
-- Cycle 3: Test compatibility with project constraints
+### С coding-standards skill
+После выбора библиотеки — проверь через coding-standards что паттерн её использования соответствует принятым стандартам проекта.
 
 ## Examples
 

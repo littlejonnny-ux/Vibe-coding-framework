@@ -12,8 +12,11 @@
 // User-level: ~/.claude.json (Windows: %USERPROFILE%\.claude.json)
 // Project-level: .claude/settings.local.json
 {
-  "model": "claude-opus-4-6",
+  "model": "sonnet",
   "env": {
+    "MAX_THINKING_TOKENS": "10000",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
+    "ENABLE_TOOL_SEARCH": "auto:5",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
     "COMPACT_THRESHOLD": "50"
   }

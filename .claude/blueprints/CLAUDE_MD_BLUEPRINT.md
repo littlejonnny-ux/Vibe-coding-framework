@@ -231,11 +231,14 @@ jobs:
 
 ## Framework Backport Configuration
 
-Для работы механизма автоматического backport укажи путь к репозиторию Vibe-Coding-Framework:
+Для работы механизма автоматического backport добавь в `CLAUDE.md` проекта путь к локальной папке Vibe-Coding-Framework:
 
 ```
-VIBE_FRAMEWORK_PATH=C:\Users\Evgeny\Documents\GitHub\Vibe-Coding-Framework
+VIBE_FRAMEWORK_PATH=[полный путь к папке Vibe-Coding-Framework на этом компьютере]
 ```
 
-Это значение нужно добавить в `CLAUDE.md` каждого нового проекта при инициализации.
-Путь должен вести к локально склонированной папке framework репозитория.
+**Примеры:**
+- Windows: `VIBE_FRAMEWORK_PATH=C:\Users\[имя пользователя]\Documents\GitHub\Vibe-Coding-Framework`
+- macOS/Linux: `VIBE_FRAMEWORK_PATH=/Users/[имя пользователя]/projects/Vibe-Coding-Framework`
+
+**Важно:** путь определяется на каждом компьютере отдельно. Спроси у пользователя где находится локальная копия framework при инициализации нового проекта.
