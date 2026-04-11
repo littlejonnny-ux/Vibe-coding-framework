@@ -27,6 +27,7 @@ Claude Code читает этот документ в начале каждой 
 │   ├── CYCLE.md                     # Полный цикл задачи по тирам
 │   ├── RETROSPECTIVE.md             # Post-merge ретроспектива
 │   ├── LEARNED_OVERRIDES.md         # Накопленные маркеры (растёт)
+│   ├── LEARNED_PATTERNS.md          # Технические паттерны из сессий (растёт)
 │   ├── CONTEXT_MANAGEMENT.md         # Context quality, compaction, usage limits
 │   ├── ARCHITECTURE_PRINCIPLES.md   # 11 принципов кода (frontend + backend)
 │   └── PLUGINS_AND_TOOLS.md         # Plugins, skill-файлы, MCP, commands, hooks
@@ -104,7 +105,10 @@ Production-приложения, внутренние инструменты, MV
 4. Сопоставляет с TRIGGER_MAP.md → какие skills/agents активировать
    ↓
 5. Проверяет LEARNED_OVERRIDES.md → есть ли маркеры,
-   переопределяющие стандартные триггеры
+   переопределяющие стандартные триггеры.
+   Проверяет LEARNED_PATTERNS.md → есть ли технические паттерны,
+   применимые к текущей задаче. Паттерны дополняют реализацию,
+   но НЕ переопределяют триггеры активации.
    ↓
 6. Активирует минимально необходимый набор механизмов
    ↓
@@ -126,6 +130,7 @@ Production-приложения, внутренние инструменты, MV
 | Цикл задачи | `workflow/CYCLE.md` | При выполнении задачи |
 | Ретроспектива | `workflow/RETROSPECTIVE.md` | После merge |
 | Накопленный опыт | `workflow/LEARNED_OVERRIDES.md` | При определении набора инструментов |
+| Технические паттерны | `workflow/LEARNED_PATTERNS.md` | При получении задачи (вместе с LEARNED_OVERRIDES) |
 | Контекст и performance | `workflow/CONTEXT_MANAGEMENT.md` | При старте сессии и при предупреждениях о контексте |
 | Архитектура кода | `workflow/ARCHITECTURE_PRINCIPLES.md` | При написании кода |
 | Plugins и инструменты | `workflow/PLUGINS_AND_TOOLS.md` | При инициализации проекта |
@@ -141,6 +146,7 @@ Production-приложения, внутренние инструменты, MV
 
 Автоматически обновляемые файлы:
 - `workflow/LEARNED_OVERRIDES.md` — после каждого post-merge retrospective
+- `workflow/LEARNED_PATTERNS.md` — после каждого post-merge retrospective (шаг 5)
 - Проектные живые документы (PROJECT_CONTEXT.md, UI_PATTERNS.md, CODE_LEARNINGS.md) — после каждого merge через /update-docs
 
 ---
