@@ -90,6 +90,12 @@ Claude Code: git add + commit (conventional commits)
   ↓
 POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md)
   ↓
+POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
+  1. node .claude/hooks/scripts/backport-analyzer.js
+  2. Показать результат анализа пользователю
+  3. Дождаться решения: "перенеси в framework" или "пропустить"
+  4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
+  ↓
 Пользователь: проверяет результат в браузере
 ```
 
@@ -113,6 +119,12 @@ POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md)
 ---
 
 ## ENTERPRISE
+
+POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
+  1. node .claude/hooks/scripts/backport-analyzer.js
+  2. Показать результат анализа пользователю
+  3. Дождаться решения: "перенеси в framework" или "пропустить"
+  4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
 
 Как STANDARD, плюс:
 - TDD обязательный для всего кода (не только бизнес-логики)
