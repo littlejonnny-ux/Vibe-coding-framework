@@ -97,7 +97,12 @@ Claude Code: git add + commit (conventional commits)
   7. git checkout main → git pull
   8. "✅ PR #N замёржен, main обновлён, документация включена."
   ↓
-POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md)
+POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md):
+  1. Сбор данных (git diff --stat, затронутые файлы)
+  2. Анализ активаций (skills, agents, /code-review)
+  3. Оценка необходимости (результативность каждого механизма)
+  4. Фиксация маркеров → LEARNED_OVERRIDES.md
+  5. Извлечение технических паттернов → LEARNED_PATTERNS.md
   ↓
 POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
   1. node .claude/hooks/scripts/backport-analyzer.js
@@ -136,7 +141,12 @@ POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
 - CI pipeline (lint → typecheck → test → build) как обязательный gate перед merge
 - Strategic compaction автоматическое (suggest-compact hook)
 
-POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md)
+POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md):
+  1. Сбор данных (git diff --stat, затронутые файлы)
+  2. Анализ активаций (skills, agents, /code-review)
+  3. Оценка необходимости (результативность каждого механизма)
+  4. Фиксация маркеров → LEARNED_OVERRIDES.md
+  5. Извлечение технических паттернов → LEARNED_PATTERNS.md
   ↓
 POST-MERGE BACKPORT:
   1. node .claude/hooks/scripts/backport-analyzer.js

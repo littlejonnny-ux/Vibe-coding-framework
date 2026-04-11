@@ -127,6 +127,11 @@ Pipeline: lint → typecheck → test → build
 - UI_PATTERNS.md — UI-решения (если новые)
 - CODE_LEARNINGS.md — паттерны и learnings кодовой базы
 
+> **Примечание:** Технические паттерны уровня framework (нетривиальное поведение API,
+> workarounds, universal patterns) записываются в `.claude/workflow/LEARNED_PATTERNS.md`
+> (шаг 5 ретроспективы), а не в CODE_LEARNINGS.md. CODE_LEARNINGS.md — проектный уровень,
+> LEARNED_PATTERNS.md — framework уровень.
+
 ## Запрещено
 - inline styles (кроме единичных динамических значений)
 - `!important`
