@@ -85,6 +85,11 @@ function readLearnedOverrides() {
   return readFile(filePath);
 }
 
+function readLearnedPatterns() {
+  const filePath = path.join(process.cwd(), '.claude', 'workflow', 'LEARNED_PATTERNS.md');
+  return readFile(filePath);
+}
+
 function extractMarkers(content) {
   if (!content || content.includes('Раздел пуст')) return [];
 
@@ -113,10 +118,39 @@ function extractMarkers(content) {
   return markers;
 }
 
-function generateBackportReport(mergeInfo, learnedOverrides) {
+function extractPatterns(content) {
+  if (!content || content.includes('Раздел пуст')) return [];
+
+  const patterns = [];
+  const sections = content.split(/^### /m).slice(1);
+
+  sections.forEach(section => {
+    const lines = section.split('\n');
+    const title = lines[0].trim();
+    const areaLine = lines.find(l => l.startsWith('- **Область:**'));
+    const patternLine = lines.find(l => l.startsWith('- **Паттерн:**'));
+    if (title && patternLine) {
+      const area = areaLine ? areaLine.replace(/^-\s*\*\*Область:\*\*\s*/, '').trim() : '';
+      const pattern = patternLine.replace(/^-\s*\*\*Паттерн:\*\*\s*/, '').trim();
+      const projectSpecificPatterns = [
+        /trigger_goals/i, /kpi.system/i, /carm/i, /smarttech/i,
+        /конкретн/i, /только для/i, /специфик/i,
+      ];
+      const isUniversal = !projectSpecificPatterns.some(p => p.test(pattern));
+      patterns.push({ title, area, pattern, isUniversal, raw: section });
+    }
+  });
+
+  return patterns;
+}
+
+function generateBackportReport(mergeInfo, learnedOverrides, learnedPatterns) {
   const frameworkPath = getFrameworkPath();
   const frameworkOverrides = frameworkPath
     ? readFile(path.join(frameworkPath, '.claude', 'workflow', 'LEARNED_OVERRIDES.md'))
+    : '';
+  const frameworkPatterns = frameworkPath
+    ? readFile(path.join(frameworkPath, '.claude', 'workflow', 'LEARNED_PATTERNS.md'))
     : '';
 
   const today = new Date().toISOString().split('T')[0];
@@ -143,30 +177,55 @@ function generateBackportReport(mergeInfo, learnedOverrides) {
     pm => !frameworkMarkers.some(fm => fm.text.includes(pm.text.slice(0, 50)))
   );
 
-  if (newMarkers.length === 0) {
-    report += `Новых универсальных маркеров не обнаружено — framework актуален.\n`;
+  const projectPatterns = extractPatterns(learnedPatterns);
+  const frameworkExistingPatterns = extractPatterns(frameworkPatterns);
+
+  const newPatterns = projectPatterns.filter(
+    pp => !frameworkExistingPatterns.some(fp => fp.pattern.includes(pp.pattern.slice(0, 50)))
+  );
+  const universalPatterns = newPatterns.filter(p => p.isUniversal);
+
+  if (newMarkers.length === 0 && universalPatterns.length === 0) {
+    report += `Новых универсальных маркеров и паттернов не обнаружено — framework актуален.\n`;
     return report;
   }
 
-  report += `**Обнаружены новые маркеры (${newMarkers.length}):**\n\n`;
-  newMarkers.forEach((marker, i) => {
-    report += `${i + 1}. ${marker.text}\n`;
-    report += `   *Тип: ${marker.isUniversal ? 'УНИВЕРСАЛЬНЫЙ' : 'ПРОЕКТНЫЙ'}*\n\n`;
-  });
+  if (newMarkers.length > 0) {
+    report += `**Обнаружены новые маркеры (${newMarkers.length}):**\n\n`;
+    newMarkers.forEach((marker, i) => {
+      report += `${i + 1}. ${marker.text}\n`;
+      report += `   *Тип: ${marker.isUniversal ? 'УНИВЕРСАЛЬНЫЙ' : 'ПРОЕКТНЫЙ'}*\n\n`;
+    });
+  }
+
+  if (universalPatterns.length > 0) {
+    report += `**Обнаружены новые технические паттерны (${universalPatterns.length}):**\n\n`;
+    universalPatterns.forEach((p, i) => {
+      report += `${i + 1}. [${p.area}] ${p.pattern}\n\n`;
+    });
+  }
 
   const universalMarkers = newMarkers.filter(m => m.isUniversal);
 
-  if (universalMarkers.length === 0) {
+  if (universalMarkers.length === 0 && universalPatterns.length === 0) {
     report += `Все новые маркеры специфичны для этого проекта — backport не нужен.\n`;
     return report;
   }
 
   report += `---\n`;
   report += `### Требует вашего решения\n\n`;
-  report += `**${universalMarkers.length} универсальных маркера** готовы к переносу в Vibe-Coding-Framework:\n\n`;
-  universalMarkers.forEach((marker, i) => {
-    report += `${i + 1}. ${marker.text}\n`;
-  });
+  if (universalMarkers.length > 0) {
+    report += `**${universalMarkers.length} универсальных маркера** готовы к переносу в Vibe-Coding-Framework:\n\n`;
+    universalMarkers.forEach((marker, i) => {
+      report += `${i + 1}. ${marker.text}\n`;
+    });
+  }
+  if (universalPatterns.length > 0) {
+    report += `\n**${universalPatterns.length} технических паттерна** готовы к переносу в Vibe-Coding-Framework:\n\n`;
+    universalPatterns.forEach((p, i) => {
+      report += `${i + 1}. [${p.area}] ${p.pattern}\n`;
+    });
+  }
 
   if (frameworkPath) {
     report += `\n**Framework путь:** \`${frameworkPath}\`\n`;
@@ -175,35 +234,53 @@ function generateBackportReport(mergeInfo, learnedOverrides) {
   } else {
     report += `\n**Репозиторий Vibe-Coding-Framework не найден автоматически.**\n`;
     report += `Укажите путь: добавьте в CLAUDE.md проекта строку:\n`;
-    report += `VIBE_FRAMEWORK_PATH=C:\Users\Evgeny\Documents\GitHub\Vibe-Coding-Framework\n`;
+    report += `VIBE_FRAMEWORK_PATH=C:\\Users\\Evgeny\\Documents\\GitHub\\Vibe-Coding-Framework\n`;
   }
 
   return report;
 }
 
-function executeBackport(universalMarkers, frameworkPath) {
-  const overridesPath = path.join(frameworkPath, '.claude', 'workflow', 'LEARNED_OVERRIDES.md');
-  const existing = readFile(overridesPath);
+function executeBackport(universalMarkers, universalPatterns, frameworkPath) {
   const today = new Date().toISOString().split('T')[0];
   const projectName = path.basename(process.cwd());
+  let filesAdded = [];
 
-  let addition = `\n### [${today}] Backport из ${projectName}\n`;
-  universalMarkers.forEach(marker => {
-    addition += `- **Маркер:** ${marker.text}\n`;
-  });
-  addition += `\n`;
+  if (universalMarkers.length > 0) {
+    const overridesPath = path.join(frameworkPath, '.claude', 'workflow', 'LEARNED_OVERRIDES.md');
+    const existing = readFile(overridesPath);
+    let addition = `\n### [${today}] Backport из ${projectName}\n`;
+    universalMarkers.forEach(marker => {
+      addition += `- **Маркер:** ${marker.text}\n`;
+    });
+    addition += `\n`;
+    writeFile(overridesPath, existing + addition);
+    filesAdded.push('.claude/workflow/LEARNED_OVERRIDES.md');
+  }
 
-  const updated = existing + addition;
-  writeFile(overridesPath, updated);
+  if (universalPatterns.length > 0) {
+    const patternsPath = path.join(frameworkPath, '.claude', 'workflow', 'LEARNED_PATTERNS.md');
+    const existing = readFile(patternsPath);
+    let addition = '';
+    universalPatterns.forEach(p => {
+      addition += `\n### [${today}] ${p.title}\n`;
+      addition += `- **Область:** ${p.area}\n`;
+      addition += `- **Паттерн:** ${p.pattern}\n`;
+      addition += `- **Источник:** Backport из ${projectName}\n`;
+    });
+    writeFile(patternsPath, existing + addition);
+    filesAdded.push('.claude/workflow/LEARNED_PATTERNS.md');
+  }
 
-  run(`git add .claude/workflow/LEARNED_OVERRIDES.md`, frameworkPath);
+  if (filesAdded.length === 0) return 'Нечего переносить.';
+
+  run(`git add ${filesAdded.join(' ')}`, frameworkPath);
   run(
-    `git commit -m "learn: backport universal markers from ${projectName} (${today})"`,
+    `git commit -m "learn: backport from ${projectName} (${today})"`,
     frameworkPath
   );
   run(`git push origin main`, frameworkPath);
 
-  return `Backport выполнен. ${universalMarkers.length} маркеров добавлены в framework и запущены.`;
+  return `Backport выполнен. ${universalMarkers.length} маркеров и ${universalPatterns.length} паттернов добавлены в framework.`;
 }
 
 async function main() {
@@ -219,7 +296,8 @@ async function main() {
 
   const mergeInfo = analyzeLastMerge();
   const learnedOverrides = readLearnedOverrides();
-  const report = generateBackportReport(mergeInfo, learnedOverrides);
+  const learnedPatterns = readLearnedPatterns();
+  const report = generateBackportReport(mergeInfo, learnedOverrides, learnedPatterns);
 
   console.log(report);
   process.exit(0);
