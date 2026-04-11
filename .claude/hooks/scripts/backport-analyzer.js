@@ -209,9 +209,12 @@ function executeBackport(universalMarkers, frameworkPath) {
 async function main() {
   const claudeMdPath = path.join(process.cwd(), 'CLAUDE.md');
   const claudeMdContent = readFile(claudeMdPath);
-  if (claudeMdContent && claudeMdContent.includes('Тир: LITE')) {
-    console.log('ℹ️ LITE тир — POST-MERGE BACKPORT пропускается.');
-    process.exit(0);
+  if (claudeMdContent) {
+    const tierMatch = claudeMdContent.match(/\b(LITE|STANDARD|ENTERPRISE)\b/i);
+    if (tierMatch && tierMatch[1].toUpperCase() === 'LITE') {
+      console.log('ℹ️ LITE тир — POST-MERGE BACKPORT пропускается.');
+      process.exit(0);
+    }
   }
 
   const mergeInfo = analyzeLastMerge();
