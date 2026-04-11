@@ -22,14 +22,16 @@ Plugins устанавливаются через интерфейс Claude Code
 
 | Plugin | Источник | Тир | Назначение |
 |--------|----------|-----|------------|
-| code-review | claude-code-plugins | STD+ | Code review в PR |
+| code-review | claude-plugins-official | STD+ | Code review в PR |
 | context7 | claude-plugins-official | STD+ | Документация библиотек |
-| security-guidance | claude-code-plugins | STD+ | Security анализ |
+| security-guidance | claude-plugins-official | STD+ | Security анализ |
 | code-simplifier | claude-plugins-official | STD+ | Упрощение кода |
 | github | claude-plugins-official | STD+ | GitHub интеграция |
 | supabase | claude-plugins-official | STD+ | Supabase интеграция |
+| typescript-lsp | claude-plugins-official | STD+ | LSP-интеграция: быстрый поиск символов |
+| frontend-design | claude-plugins-official | STD+ | UI/UX компоненты, дизайн-токены, accessibility |
 
-**Правило:** Не более 5–6 plugins одновременно. Descriptions каждого plugin занимают место в контекстном окне, влияя на качество ответов.
+**Правило:** Не более 8 plugins одновременно. Descriptions каждого plugin занимают место в контекстном окне, влияя на качество ответов.
 
 ---
 
@@ -96,7 +98,7 @@ Hooks настраиваются через `.claude/hooks/hooks.json`. Скри
 - [ ] Создать CLAUDE.md
 
 ### STANDARD (в дополнение)
-- [ ] Установить 5 plugins
+- [ ] Установить plugins по списку выше (до 8)
 - [ ] Настроить hooks (hooks.json + скрипты)
 - [ ] Настроить settings.json (model, tokens, autocompact)
 - [ ] Создать `.github/workflows/ci.yml` по шаблону из CLAUDE_MD_BLUEPRINT.md
