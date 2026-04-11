@@ -7,6 +7,8 @@
 ```
 Пользователь: описывает задачу
   ↓
+[LITE: проверка Ultraplan НЕ выполняется — тир слишком простой]
+  ↓
 Claude Code: создаёт feature-ветку (feature/название или fix/описание)
   ↓
 Claude Code: пишет код
@@ -28,6 +30,11 @@ Claude Code: git push → merge в main
 Пользователь: описывает задачу
   ↓
 Claude Code: читает CLAUDE.md + VIBE_CODING_WORKFLOW.md
+  ↓
+[Шаг 0.5] Проверка на Ultraplan (см. TRIGGER_MAP.md → «Триггеры Ultraplan»):
+  → ≥2 сигналов A или ≥1 сигнала B → предложить Ultraplan → ждать ответа
+  → Пользователь пишет «продолжай» → продолжить цикл
+  → Пользователь пишет /ultraplan → запустить облачное планирование
   ↓
 Claude Code: определяет сложность (см. TRIGGER_MAP.md)
   ↓
@@ -120,18 +127,22 @@ POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
 
 ## ENTERPRISE
 
-POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
-  1. node .claude/hooks/scripts/backport-analyzer.js
-  2. Показать результат анализа пользователю
-  3. Дождаться решения: "перенеси в framework" или "пропустить"
-  4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
-
 Как STANDARD, плюс:
 - TDD обязательный для всего кода (не только бизнес-логики)
 - Verification loop после каждого PR (build → typecheck → lint → test → security → diff review)
 - E2E тесты для workflow-механик
 - CI pipeline (lint → typecheck → test → build) как обязательный gate перед merge
 - Strategic compaction автоматическое (suggest-compact hook)
+
+POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md)
+  ↓
+POST-MERGE BACKPORT:
+  1. node .claude/hooks/scripts/backport-analyzer.js
+  2. Показать результат анализа пользователю
+  3. Дождаться решения: "перенеси в framework" или "пропустить"
+  4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
+  ↓
+Пользователь: проверяет результат в браузере
 
 ---
 

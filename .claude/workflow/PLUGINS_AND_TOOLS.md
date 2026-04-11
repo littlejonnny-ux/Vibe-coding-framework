@@ -51,22 +51,22 @@
 | Agent | Файл | Модель | Тир |
 |---|---|---|---|
 | planner | `.claude/agents/planner.md` | opus | STD+ |
-| code-reviewer | `.claude/agents/code-reviewer.md` | opus | STD+ |
-| security-reviewer | `.claude/agents/security-reviewer.md` | opus | STD+ |
-| build-error-resolver | `.claude/agents/build-error-resolver.md` | opus | ALL |
-| database-reviewer | `.claude/agents/database-reviewer.md` | opus | STD+ |
+| code-reviewer | `.claude/agents/code-reviewer.md` | sonnet | STD+ |
+| security-reviewer | `.claude/agents/security-reviewer.md` | sonnet | STD+ |
+| build-error-resolver | `.claude/agents/build-error-resolver.md` | sonnet | ALL |
+| database-reviewer | `.claude/agents/database-reviewer.md` | sonnet | STD+ |
 
 ---
 
 ## MCP-серверы
 
-На Max Plan с Opus (1M контекст) overhead от MCP descriptions составляет 0.2–0.3% контекстного окна — незначительно. MCP предпочтительнее CLI: структурированные данные, меньше парсинга, меньше ошибок.
+GitHub, Supabase и Context7 заменены официальными плагинами (`claude-plugins-official`) — они легче по overhead на descriptions и официально поддерживаются Anthropic. MCP остаются опцией для сервисов без официального плагина (Playwright, специфичные корпоративные сервисы).
 
 | Сервис | Тип | Конфигурация | Scope |
 |---|---|---|---|
-| GitHub | MCP (глобальный) | `~/.claude.json` → mcpServers → github | Все репозитории |
-| Supabase | MCP (глобальный) | `~/.claude.json` → mcpServers → supabase | Все проекты (без project_ref) |
-| Context7 | Plugin | `/plugin install context7@claude-plugins-official` | Глобальный |
+| GitHub | Plugin | `github@claude-plugins-official` | Все репозитории |
+| Supabase | Plugin | `supabase@claude-plugins-official` | Все проекты |
+| Context7 | Plugin | `context7@claude-plugins-official` | Глобальный |
 | Vercel | Не нужен | auto-deploy через git push | — |
 | Playwright | MCP (по необходимости) | Добавить в проектный .claude.json | ENTERPRISE tier |
 

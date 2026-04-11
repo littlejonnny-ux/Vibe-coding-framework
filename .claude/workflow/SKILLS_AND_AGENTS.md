@@ -20,10 +20,13 @@ Skills загружаются в контекст только при актив
 | # | Agent | Источник | Модель | Тир | Назначение |
 |---|---|---|---|---|---|
 | 1 | planner | ECC | opus | STD+ | Декомпозиция сложных задач на шаги с файлами и рисками |
-| 2 | code-reviewer | ECC | opus | STD+ | Quality + security review с confidence-based filtering (>80%) |
-| 3 | security-reviewer | ECC | opus | STD+ | OWASP Top 10, secrets, input validation, CSRF, XSS |
-| 4 | build-error-resolver | ECC | opus | ALL | Исправление ошибок сборки: npm run build failed |
-| 5 | database-reviewer | ECC | opus | STD+ | Supabase queries, RLS, миграции, N+1, unbounded queries |
+| 2 | code-reviewer | ECC | sonnet | STD+ | Quality + security review с confidence-based filtering (>80%) |
+| 3 | security-reviewer | ECC | sonnet | STD+ | OWASP Top 10, secrets, input validation, CSRF, XSS |
+| 4 | build-error-resolver | ECC | sonnet | ALL | Исправление ошибок сборки: npm run build failed |
+| 5 | database-reviewer | ECC | sonnet | STD+ | Supabase queries, RLS, миграции, N+1, unbounded queries |
+
+> Модели обновлены в апреле 2026 (оптимизация usage limits).
+> Подробнее: workflow/MODEL_ROUTING_GUIDE.md
 
 Agents — это отдельные экземпляры Claude Code с ограниченным scope. Каждый вызов агента расходует сообщения из usage limit (Max Plan). Вызывать только по триггеру для рационального использования лимита.
 
