@@ -103,11 +103,10 @@ npx eslint . --fix
 
 ## When NOT to Use
 
-- Code needs refactoring → use `refactor-cleaner`
-- Architecture changes needed → use `architect`
-- New features required → use `planner`
-- Tests failing → use `tdd-guide`
-- Security issues → use `security-reviewer`
+- Code needs large-scale refactoring — use **planner** agent for planning, then implement
+- Architecture changes needed — use **planner** agent
+- Security issues — use **security-reviewer** agent
+- Database schema/query issues — use **database-reviewer** agent
 
 ---
 
