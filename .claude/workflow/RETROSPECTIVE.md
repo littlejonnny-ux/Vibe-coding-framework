@@ -63,3 +63,16 @@ git diff origin/main~1..origin/main --name-only  # затронутые файл
 - Docs-only изменения
 - Пустые merge (только .gitkeep, конфиги)
 - Тир LITE (ретроспектива добавлена только в STANDARD и ENTERPRISE)
+
+---
+
+## POST-MERGE BACKPORT
+
+После завершения ретроспективы (только STANDARD и ENTERPRISE):
+
+1. Запустить `node .claude/hooks/scripts/backport-analyzer.js`
+2. Показать результат анализа пользователю
+3. Дождаться решения: «перенеси в framework» или «пропустить»
+4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
+
+**Скрипт автоматически пропускает LITE тир.** Для STANDARD/ENTERPRISE запускается всегда.

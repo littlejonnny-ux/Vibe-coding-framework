@@ -118,6 +118,7 @@ Production-приложения, внутренние инструменты, MV
 | Контекст и performance | `workflow/CONTEXT_MANAGEMENT.md` | При старте сессии и при предупреждениях о контексте |
 | Архитектура кода | `workflow/ARCHITECTURE_PRINCIPLES.md` | При написании кода |
 | Plugins и инструменты | `workflow/PLUGINS_AND_TOOLS.md` | При инициализации проекта |
+| Маршрутизация моделей | `workflow/MODEL_ROUTING_GUIDE.md` | При выборе модели для агента |
 | Blueprint CLAUDE.md | `blueprints/CLAUDE_MD_BLUEPRINT.md` | При создании нового проекта |
 | Blueprint ТЗ | `blueprints/TECH_SPEC_BLUEPRINT.md` | При создании нового проекта |
 

@@ -16,20 +16,18 @@
 
 ---
 
-## Plugins (устанавливаются через /plugin install)
+## Plugins (устанавливаются через Claude Code UI → Plugins)
 
-```bash
-# STANDARD tier — обязательные
-/plugin install code-review@claude-code-plugins
-/plugin install context7@claude-plugins-official
-/plugin install security-guidance@claude-code-plugins
-/plugin install code-simplifier@claude-plugins-official
-/plugin install claude-md-management@...    # проверить актуальное имя
+Plugins устанавливаются через интерфейс Claude Code (не через CLI команды). Установить через: Settings → Plugins → Browse.
 
-# ENTERPRISE tier — дополнительные (по необходимости)
-# /plugin install ralph-loop@claude-code-plugins     # автономные циклы
-# /plugin install playwright@...                      # E2E тестирование
-```
+| Plugin | Источник | Тир | Назначение |
+|--------|----------|-----|------------|
+| code-review | claude-code-plugins | STD+ | Code review в PR |
+| context7 | claude-plugins-official | STD+ | Документация библиотек |
+| security-guidance | claude-code-plugins | STD+ | Security анализ |
+| code-simplifier | claude-plugins-official | STD+ | Упрощение кода |
+| github | claude-plugins-official | STD+ | GitHub интеграция |
+| supabase | claude-plugins-official | STD+ | Supabase интеграция |
 
 **Правило:** Не более 5–6 plugins одновременно. Descriptions каждого plugin занимают место в контекстном окне, влияя на качество ответов.
 

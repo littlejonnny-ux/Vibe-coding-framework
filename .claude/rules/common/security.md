@@ -1,8 +1,9 @@
 # Security Guidelines
 
-## Mandatory Security Checks
+## Security Checks
 
-Before ANY commit:
+Run these checks when the PR touches auth, API routes, user input, database queries, or sensitive data. For docs-only or CSS-only changes — skip.
+
 - [ ] No hardcoded secrets (API keys, passwords, tokens)
 - [ ] All user inputs validated
 - [ ] SQL injection prevention (parameterized queries)

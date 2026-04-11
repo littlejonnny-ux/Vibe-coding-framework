@@ -207,6 +207,13 @@ function executeBackport(universalMarkers, frameworkPath) {
 }
 
 async function main() {
+  const claudeMdPath = path.join(process.cwd(), 'CLAUDE.md');
+  const claudeMdContent = readFile(claudeMdPath);
+  if (claudeMdContent && claudeMdContent.includes('Тир: LITE')) {
+    console.log('ℹ️ LITE тир — POST-MERGE BACKPORT пропускается.');
+    process.exit(0);
+  }
+
   const mergeInfo = analyzeLastMerge();
   const learnedOverrides = readLearnedOverrides();
   const report = generateBackportReport(mergeInfo, learnedOverrides);

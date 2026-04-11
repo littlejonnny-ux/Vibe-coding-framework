@@ -2,28 +2,23 @@
 
 ## Available Agents
 
-Located in `~/.claude/agents/`:
+Located in `.claude/agents/` (project-level) or `~/.claude/agents/` (user-level):
 
-| Agent | Purpose | When to Use |
-|-------|---------|-------------|
-| planner | Implementation planning | Complex features, refactoring |
-| architect | System design | Architectural decisions |
-| tdd-guide | Test-driven development | New features, bug fixes |
-| code-reviewer | Code review | After writing code |
-| security-reviewer | Security analysis | Before commits |
-| build-error-resolver | Fix build errors | When build fails |
-| e2e-runner | E2E testing | Critical user flows |
-| refactor-cleaner | Dead code cleanup | Code maintenance |
-| doc-updater | Documentation | Updating docs |
-| rust-reviewer | Rust code review | Rust projects |
+| Agent | Purpose | Model | When to Use |
+|-------|---------|-------|-------------|
+| planner | Implementation planning | opus | Complex features, refactoring |
+| code-reviewer | Code review | sonnet | After writing code |
+| security-reviewer | Security analysis | sonnet | Before commits with auth/API/input |
+| build-error-resolver | Fix build errors | sonnet | When build fails |
+| database-reviewer | DB query/schema review | sonnet | When writing SQL or migrations |
 
 ## Immediate Agent Usage
 
 No user prompt needed:
-1. Complex feature requests - Use **planner** agent
-2. Code just written/modified - Use **code-reviewer** agent
-3. Bug fix or new feature - Use **tdd-guide** agent
-4. Architectural decision - Use **architect** agent
+1. Complex feature requests — use **planner** agent
+2. Code just written/modified — use **code-reviewer** agent
+3. Build or type errors — use **build-error-resolver** agent
+4. Auth, API routes, sensitive data — use **security-reviewer** agent
 
 ## Parallel Task Execution
 
