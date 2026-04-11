@@ -101,7 +101,8 @@ If you find a CRITICAL vulnerability:
 
 ## Reference
 
-For detailed vulnerability patterns, code examples, report templates, and PR review templates, see skill: `security-review`.
+- Security rules and checklists: `rules/common/security.md`
+- TypeScript-specific security patterns: `rules/typescript/security.md`
 
 ---
 
