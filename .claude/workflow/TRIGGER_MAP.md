@@ -33,7 +33,7 @@ Contexts — это файлы поведения Claude Code в разных р
 | «Рефакторинг 10+ файлов» | coding-standards + verification-loop | ENT |
 | «Добавь workflow согласования» | coding-standards + verification-loop | ENT |
 | Сессия длинная, context >50% | strategic-compact | STD+ |
-| Новая страница, форма, workflow, CRUD, смена статуса (UI) | e2e-тест (Playwright) | STD+ |
+| Новая страница, форма, workflow, CRUD, смена статуса (UI) | e2e-testing | STD+ |
 
 ## Триггеры активации agents
 
@@ -56,6 +56,8 @@ Contexts — это файлы поведения Claude Code в разных р
 | Бизнес-логика, формулы, серверные routes | /tdd | STD+ |
 | Перед merge крупного PR (>200 строк) | /verify | ENT |
 | Сессия длинная, context забит | /compact | STD+ |
+| Новая UI-механика в PR | /e2e | STD+ |
+| merges_without_full_e2e ≥ 5 или явный запрос full suite | /e2e-full | STD+ |
 
 ---
 

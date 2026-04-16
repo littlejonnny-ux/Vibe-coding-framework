@@ -31,6 +31,7 @@ function detectProjectType() {
     if (allDeps['tailwindcss']) frameworks.push('Tailwind CSS');
     if (allDeps['prisma'] || allDeps['@prisma/client']) frameworks.push('Prisma');
     if (allDeps['drizzle-orm']) frameworks.push('Drizzle');
+    if (allDeps['@playwright/test']) frameworks.push('Playwright');
   }
 
   if (fileExists(cwd, 'supabase', 'config.toml')) {
