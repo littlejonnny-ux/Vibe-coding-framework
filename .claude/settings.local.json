@@ -22,7 +22,9 @@
       "Bash(node -e \"require\\(''./.claude/hooks/scripts/pre-compact.js''\\)\")",
       "Bash(node -e \"require\\(''./.claude/hooks/scripts/suggest-compact.js''\\)\")",
       "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-start.js''\\)\")",
-      "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-end.js''\\)\")"
+      "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-end.js''\\)\")",
+      "Bash(npx playwright:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

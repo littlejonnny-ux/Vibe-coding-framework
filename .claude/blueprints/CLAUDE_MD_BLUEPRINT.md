@@ -161,7 +161,8 @@ Pipeline: lint → typecheck → test → build
 |---|---|
 | Валидация форм | Zod + React Hook Form (если React) / Zod standalone (если API) |
 | Форматтер | Prettier (если JS/TS) / Black (если Python) |
-| Test runner | Vitest (если Vite) / Jest (если Next.js без Turbopack) / Playwright (E2E) |
+| Unit/integration test runner | Vitest (если Vite) / Jest (если Next.js без Turbopack) |
+| E2E test runner | Playwright (`@playwright/test`) — STD+ при наличии UI |
 | ORM/Query builder | Drizzle или Prisma (если SQL) / Supabase client (если Supabase) |
 | Лinter | ESLint (если JS/TS) / Ruff (если Python) |
 | State management | TanStack Query (server state) + useState/useReducer (local state) |
@@ -212,7 +213,7 @@ jobs:
 | pnpm | `pnpm install --frozen-lockfile`, cache: 'pnpm' |
 | yarn | `yarn --frozen-lockfile`, cache: 'yarn' |
 | Jest вместо Vitest | `npm run test -- --ci` |
-| Playwright (STANDARD+ при наличии UI) | Отдельный job `e2e:` с `npx playwright install --with-deps chromium` |
+| Playwright (STD+ при наличии UI) | Отдельный job `e2e:` с `npx playwright install --with-deps chromium` |
 
 ### Правила
 
