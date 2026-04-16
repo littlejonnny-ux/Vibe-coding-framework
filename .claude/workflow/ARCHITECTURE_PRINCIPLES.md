@@ -107,3 +107,109 @@ Claude Code проверяет:
 - [ ] Если используется в 2+ модулях — в shared/
 - [ ] Компонент/функция ≤ 300 строк, файл ≤ 800 строк
 - [ ] Серверные операции атомарны
+
+---
+
+## E2E-тестирование пользовательских сценариев (STANDARD+)
+
+### Принцип: механика без E2E-теста — незавершённая механика
+
+Каждая пользовательская механика, доходящая до merge, сопровождается E2E-тестом.
+Тест пишется в том же PR, не откладывается.
+
+### Что считается пользовательской механикой (и требует E2E)
+
+- Новая страница с интерактивными элементами
+- CRUD-операция (создание, редактирование, удаление сущности)
+- Смена статуса (workflow: draft → active → approved)
+- Форма с валидацией и отправкой данных
+- Ролевое ограничение (пользователь X не должен видеть/делать Y)
+- Навигационный переход (клик → открывается детальная страница)
+
+### Что НЕ требует E2E
+
+- Чистая бизнес-логика без UI (calculations.ts) — покрыта unit-тестами
+- Data layer (hooks/) без нового UI — покрыт unit-тестами
+- Стилевые правки (CSS, цвета, отступы)
+- Docs-only изменения
+
+### Структура тестов
+
+```
+src/__tests__/e2e/
+├── auth.spec.ts              # Логин, роли, редиректы, смена пароля
+├── dashboard.spec.ts         # Дашборды по ролям, метрики, навигация
+├── kpi-library.spec.ts       # CRUD библиотеки, фильтры, копирование
+├── kpi-cards.spec.ts         # Карты: создание, факт, согласование, формула
+├── participants.spec.ts      # CRUD участников, импорт, сброс пароля
+├── trigger-goals.spec.ts     # CRUD запускающих целей
+├── dictionaries.spec.ts      # CRUD справочников
+├── negative.spec.ts          # Негативные сценарии (запреты, валидация)
+└── helpers/
+    ├── auth.helper.ts        # Логин под разными ролями
+    ├── seed.helper.ts        # Подготовка тестовых данных
+    └── constants.ts          # Тестовые credentials, URLs
+```
+
+### Формат E2E-теста
+
+```typescript
+test('Participant вводит факт binary — % исполнения обновляется', async ({ page }) => {
+  // Arrange: логин как participant, открыть карту с binary KPI
+  // Act: нажать "Да"
+  // Assert: % исполнения = 100%, визуально зелёный progress bar
+});
+```
+
+### Когда запускать — трёхуровневая схема
+
+Claude Code определяет уровень автоматически на основе `git diff` перед merge.
+
+#### Уровень 1 — Пропуск E2E
+
+**Условие:** PR не затрагивает UI. Изменения только в:
+- calculations.ts, constants.ts, utils.ts
+- hooks/ без новых компонентов
+- .md файлы, конфиги, CSS-only
+
+**Действие:** E2E не запускаются. Счётчик merges_without_full_e2e += 1.
+
+#### Уровень 2 — Targeted E2E
+
+**Условие:** PR затрагивает UI конкретного модуля.
+
+**Действие:** запустить E2E-тесты только затронутого модуля:
+- Изменения в features/kpi-cards/ → `npx playwright test kpi-cards.spec.ts`
+- Изменения в features/kpi-library/ → `npx playwright test kpi-library.spec.ts`
+- Изменения в features/participants/ → `npx playwright test participants.spec.ts`
+- Изменения в features/trigger-goals/ → `npx playwright test trigger-goals.spec.ts`
+- Изменения в features/shared/ или app/(dashboard)/ → `npx playwright test dashboard.spec.ts`
+
+Счётчик merges_without_full_e2e += 1.
+
+#### Уровень 3 — Full scope E2E
+
+**Условие:** срабатывает ЛЮБОЙ из триггеров:
+1. Счётчик merges_without_full_e2e ≥ 5
+2. Завершение Stage из мастер-плана (любого)
+3. Изменения в auth/, middleware, RLS-политиках, api/ routes
+4. Изменения затрагивают ≥3 модуля одновременно
+5. Пользователь явно запросил full scope
+
+**Действие:** `npx playwright test` (все файлы). Счётчик merges_without_full_e2e = 0.
+
+### Счётчик merges_without_full_e2e
+
+Хранится в `PROJECT_CONTEXT.md` в секции «Текущий статус» как строка:
+```
+**E2E full scope:** последний — [дата], merge без full scope с тех пор: [N]
+```
+
+Claude Code обновляет эту строку при каждом merge через /update-docs:
+- Уровень 1 или 2 — инкрементировать N
+- Уровень 3 — записать текущую дату, сбросить N = 0
+
+### Нарастание тестов по этапам
+
+Тесты накапливаются: Stage N пишет свои + прогоняет все предыдущие при full scope.
+Если Stage N сломал сценарий из Stage N-1 — full scope E2E поймает, merge заблокирован.
