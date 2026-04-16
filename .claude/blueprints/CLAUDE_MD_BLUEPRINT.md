@@ -212,7 +212,7 @@ jobs:
 | pnpm | `pnpm install --frozen-lockfile`, cache: 'pnpm' |
 | yarn | `yarn --frozen-lockfile`, cache: 'yarn' |
 | Jest вместо Vitest | `npm run test -- --ci` |
-| Playwright (ENTERPRISE) | Отдельный job `e2e:` с `npx playwright install --with-deps` |
+| Playwright (STANDARD+ при наличии UI) | Отдельный job `e2e:` с `npx playwright install --with-deps chromium` |
 
 ### Правила
 
@@ -220,6 +220,29 @@ jobs:
 - STANDARD: CI информационный — Claude Code мёржит через `gh pr merge` независимо от CI
 - ENTERPRISE: CI обязателен — настроить branch protection, merge только при зелёном CI
 - Файл `.github/workflows/ci.yml` включается в первый коммит проекта
+
+### E2E job шаблон (добавляется когда появляются первые E2E-тесты)
+
+```yaml
+  e2e:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+```
 
 ---
 
