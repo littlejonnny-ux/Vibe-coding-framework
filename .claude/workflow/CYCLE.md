@@ -78,6 +78,8 @@ PRE-COMMIT ЧЕКЛИСТ:
      - [ ] UI соответствует UI_PATTERNS.md (если применимо)
      - [ ] Бизнес-логика соответствует TECHNICAL_SPECIFICATION.md
      - [ ] Новые компоненты соответствуют ARCHITECTURE_PRINCIPLES.md
+     - [ ] Если PR содержит новую UI-механику — написан E2E-тест (см. ARCHITECTURE_PRINCIPLES.md → E2E)
+     - [ ] E2E-тесты запущены по трёхуровневой схеме (см. ARCHITECTURE_PRINCIPLES.md → Когда запускать)
   ↓
 Claude Code: git add + commit (conventional commits)
   ↓
@@ -137,7 +139,7 @@ POST-MERGE BACKPORT (только STANDARD и ENTERPRISE):
 Как STANDARD, плюс:
 - TDD обязательный для всего кода (не только бизнес-логики)
 - Verification loop после каждого PR (build → typecheck → lint → test → security → diff review)
-- E2E тесты для workflow-механик
+- E2E тесты для workflow-механик (обязательны; в STANDARD — обязательны при наличии UI-механик)
 - CI pipeline (lint → typecheck → test → build) как обязательный gate перед merge
 - Strategic compaction автоматическое (suggest-compact hook)
 
