@@ -33,6 +33,7 @@ Contexts — это файлы поведения Claude Code в разных р
 | «Рефакторинг 10+ файлов» | coding-standards + verification-loop | ENT |
 | «Добавь workflow согласования» | coding-standards + verification-loop | ENT |
 | Сессия длинная, context >50% | strategic-compact | STD+ |
+| Новая страница, форма, workflow, CRUD, смена статуса (UI) | e2e-тест (Playwright) | STD+ |
 
 ## Триггеры активации agents
 
@@ -68,6 +69,8 @@ Contexts — это файлы поведения Claude Code в разных р
 | Текстовые правки (labels, placeholder, tooltip) | Все кроме lint + commit |
 | Правка в одном компоненте <50 строк | planner |
 | Добавление/изменение .gitignore, README, конфигов | Все кроме lint + commit |
+| Изменения только в calculations.ts, constants.ts, utils.ts (без UI) | E2E-тесты (покрыто unit-тестами) |
+| Изменения только в data layer (hooks/) без нового UI | E2E-тесты |
 
 ---
 
