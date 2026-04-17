@@ -48,6 +48,18 @@
           }
         ],
         "description": "Persist session state after each response"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/scripts/post-merge-reminder.js",
+            "async": true,
+            "timeout": 5
+          }
+        ],
+        "description": "Remind about /update-docs and retrospective after merge on main"
       }
     ]
   }
