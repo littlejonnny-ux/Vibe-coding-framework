@@ -42,3 +42,35 @@
 - **Контекст:** PR содержит SQL-миграции с RLS-политиками, PostgreSQL functions, множеством таблиц
 - **Результативно:** database-reviewer И security-reviewer — оба критически важны
 - **Маркер:** Supabase миграции с RLS-политиками → ОБЯЗАТЕЛЬНО запускать database-reviewer И security-reviewer. database-reviewer проверяет схему/индексы, security-reviewer проверяет дыры в RLS. Подтверждено на Stage 2 KPI-System-2 (9 миграций, 18 таблиц).
+
+---
+
+**Маркер 6 — Новый auth flow (AuthProvider, route guard, role-based routing)**
+- **Контекст:** PR добавляет auth context provider, proxy/middleware с сессией, серверный layout с ROUTE_PERMISSIONS, страницу логина
+- **Результативно:** security-reviewer + code-reviewer — оба полезны
+- **Избыточно:** e2e-testing — только если помимо логина нет хотя бы одного полноценного рабочего маршрута
+- **Маркер:** Новый auth flow (AuthProvider, proxy.ts/middleware, ROUTE_PERMISSIONS) → запускать security-reviewer и code-reviewer. e2e-testing — только если есть реальный user journey за пределами страницы логина. Подтверждено на Stage 3 KPI-System-2.
+
+---
+
+**Маркер 7 — API routes с role-based access control**
+- **Контекст:** PR добавляет новые API routes с проверкой роли пользователя, статусными машинами, user input в route handlers
+- **Результативно:** security-reviewer КРИТИЧЕН + code-reviewer полезен
+- **Избыточно:** e2e-testing — если unit-тесты покрывают 80%+ route handlers
+- **Маркер:** Новые API routes с role-based access control → ОБЯЗАТЕЛЬНО security-reviewer + code-reviewer. Если unit-тесты покрывают 80%+ route handlers — e2e-testing можно пропустить. Подтверждено на Stage 6 KPI-System-2.
+
+---
+
+**Маркер 8 — Dashboard UI: только read-only display, без форм и мутаций**
+- **Контекст:** PR добавляет новые страницы/компоненты с charts, таблицами, метриками — без форм и записей в БД
+- **Результативно:** code-reviewer полезен; e2e-testing ценен (role routing, разные dashboards per role)
+- **Избыточно:** security-reviewer (read-only данные через TanStack Query + RLS, нет форм, нет мутаций, нет user input)
+- **Маркер:** Новые dashboard UI-компоненты (только read-only display, без форм и мутаций) → code-reviewer + e2e-testing, пропускать security-reviewer. Подтверждено на Stage 7 KPI-System-2.
+
+---
+
+**Маркер 9 — CRUD modal с complex forms и мутациями в БД**
+- **Контекст:** PR добавляет CRUD modal с useFieldArray, мутациями через хуки/API, user input из форм пишется в БД
+- **Результативно:** ВСЕ ТРИ критичны — code-reviewer (сложная форма), e2e-testing (ключевой CRUD flow), security-reviewer (user input → мутации = attack surface)
+- **Избыточно:** ничего
+- **Маркер:** CRUD modal с complex forms (useFieldArray, мутации в БД) → запускать ВСЕ THREE: code-reviewer + e2e-testing + security-reviewer. Форма с мутациями = attack surface. Подтверждено на Stage 8 KPI-System-2.
