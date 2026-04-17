@@ -97,7 +97,24 @@ Claude Code: git add + commit (conventional commits)
   5. Закоммитить обновления документации → запушить
   6. gh pr merge --merge --delete-branch
   7. git checkout main → git pull
-  8. "✅ PR #N замёржен, main обновлён, документация включена."
+  8. Вывести Living Docs Dashboard — обязательная таблица статуса документов.
+
+     Для каждого документа из списка ниже:
+     - Проверить через `git diff origin/main..HEAD --name-only` — изменялся ли файл в этом PR
+     - Если изменялся — ✅
+     - Если НЕ изменялся — ❌ + краткое объективное пояснение (одно предложение)
+
+     | # | Документ | Статус | Комментарий |
+     |---|----------|--------|-------------|
+     | 1 | PROJECT_CONTEXT.md | ✅/❌ | — |
+     | 2 | TECHNICAL_SPECIFICATION.md | ✅/❌ | — |
+     | 3 | UI_PATTERNS.md | ✅/❌ | — |
+     | 4 | CODE_LEARNINGS.md | ✅/❌ | — |
+     | 5 | LEARNED_OVERRIDES.md | ✅/❌ | — |
+     | 6 | LEARNED_PATTERNS.md | ✅/❌ | — |
+     | 7 | ARCHITECTURE_PRINCIPLES.md | ✅/❌ | — |
+
+     "✅ PR #N замёржен, main обновлён. Living docs: X/Y обновлены."
   ↓
 POST-MERGE RETROSPECTIVE (см. RETROSPECTIVE.md):
   1. Сбор данных (git diff --stat, затронутые файлы)
@@ -155,6 +172,20 @@ POST-MERGE BACKPORT:
   2. Показать результат анализа пользователю
   3. Дождаться решения: "перенеси в framework" или "пропустить"
   4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
+  ↓
+Living Docs Dashboard (обязательно после merge):
+
+     | # | Документ | Статус | Комментарий |
+     |---|----------|--------|-------------|
+     | 1 | PROJECT_CONTEXT.md | ✅/❌ | — |
+     | 2 | TECHNICAL_SPECIFICATION.md | ✅/❌ | — |
+     | 3 | UI_PATTERNS.md | ✅/❌ | — |
+     | 4 | CODE_LEARNINGS.md | ✅/❌ | — |
+     | 5 | LEARNED_OVERRIDES.md | ✅/❌ | — |
+     | 6 | LEARNED_PATTERNS.md | ✅/❌ | — |
+     | 7 | ARCHITECTURE_PRINCIPLES.md | ✅/❌ | — |
+
+     "✅ PR #N замёржен, main обновлён. Living docs: X/Y обновлены."
   ↓
 Пользователь: проверяет результат в браузере
 
