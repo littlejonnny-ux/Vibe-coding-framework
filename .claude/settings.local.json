@@ -24,7 +24,8 @@
       "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-start.js''\\)\")",
       "Bash(node -e \"require\\(''./.claude/hooks/scripts/session-end.js''\\)\")",
       "Bash(npx playwright:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(node .claude/hooks/scripts/compliance-monitor.js)"
     ]
   }
 }

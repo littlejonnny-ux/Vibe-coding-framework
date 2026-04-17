@@ -60,6 +60,18 @@
           }
         ],
         "description": "Remind about /update-docs and retrospective after merge on main"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/scripts/compliance-monitor.js",
+            "async": true,
+            "timeout": 15
+          }
+        ],
+        "description": "Log VKF compliance checks to sessions/compliance-log.jsonl"
       }
     ]
   }
