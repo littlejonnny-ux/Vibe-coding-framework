@@ -69,6 +69,17 @@
 4. `UI_PATTERNS.md` — принятые UI-решения (если UI-проект)
 5. `PROJECT_CONTEXT.md` — карта файлов, текущий статус
 
+## После compaction
+
+После каждого compaction (autocompact или ручного /compact) — ОБЯЗАТЕЛЬНО перечитай:
+1. `.claude/workflow/CYCLE.md` — полный цикл задачи, post-merge шаги, Living Docs Dashboard
+2. `.claude/workflow/TRIGGER_MAP.md` — все триггеры активации skills/agents/commands
+3. `.claude/skills/e2e-testing/SKILL.md` — трёхуровневая схема E2E, счётчик, шаблоны
+4. `.claude/workflow/RETROSPECTIVE.md` — 5 шагов ретроспективы
+
+Эти документы содержат критические развилки процесса, которые теряются при сжатии контекста.
+Без перечитывания — высокий риск пропуска post-merge шагов (update-docs, ретроспектива, E2E).
+
 ## Активированные механизмы
 [Список skills, agents, commands, plugins — из tier-матрицы SKILLS_AND_AGENTS.md]
 
@@ -222,13 +233,16 @@ jobs:
 - ENTERPRISE: CI обязателен — настроить branch protection, merge только при зелёном CI
 - Файл `.github/workflows/ci.yml` включается в первый коммит проекта
 
-### E2E job шаблон (добавляется когда появляются первые E2E-тесты)
+### E2E jobs шаблон (добавляется когда появляются первые E2E-тесты)
+
+Два job-а: первый запускает тесты (не блокирует), второй блокирует merge при нулевом покрытии.
 
 ```yaml
   e2e:
     runs-on: ubuntu-latest
     needs: quality
     if: github.event_name == 'pull_request'
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -243,7 +257,34 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  e2e-coverage-check:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Check E2E test exists
+        run: |
+          count=$(find e2e -name "*.spec.ts" 2>/dev/null | wc -l)
+          if [ "$count" -eq "0" ]; then
+            echo "❌ No E2E tests found. Add at least navigation.spec.ts."
+            exit 1
+          fi
+          echo "✅ E2E tests present: $count spec files"
 ```
+
+### Правила E2E jobs
+
+- `e2e` job: `continue-on-error: true` — тест-сьюит может падать, не блокирует merge
+- `e2e-coverage-check` job: блокирует merge если в `e2e/` нет ни одного `.spec.ts`
+- STANDARD: оба job-а добавляются при появлении первого E2E-теста
+- ENTERPRISE: `e2e` job переводится в `continue-on-error: false` (тесты должны быть зелёными)
 
 ---
 
