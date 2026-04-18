@@ -21,6 +21,10 @@ Claude Code: git add + commit (conventional: feat:/fix:/refactor:/docs:/test:)
   ↓
 Claude Code: git push → merge в main
   ↓
+ОБЯЗАТЕЛЬНО перед финальным сообщением:
+   git status --porcelain
+   Если не пусто — закоммитить всё, что относится к проекту, артефакты в .gitignore.
+  ↓
 Пользователь: проверяет результат
 ```
 
@@ -97,6 +101,23 @@ Claude Code: git add + commit (conventional commits)
   5. Закоммитить обновления документации → запушить
   6. gh pr merge --merge --delete-branch
   7. git checkout main → git pull
+  7.5. ОБЯЗАТЕЛЬНО: проверка чистоты working directory
+
+   ```bash
+   git status --porcelain
+   ```
+
+   Если вывод пуст — working directory чист, переходить к шагу 8.
+
+   Если вывод НЕ пуст — есть файлы, не попавшие в коммит:
+   - Для каждого файла определить:
+     a) Относится к проекту (код, тесты, конфиги) — git add + коммит + push
+     b) Генерируемый артефакт (playwright-report/, test-results/, .next/, node_modules/, *.log) — добавить в .gitignore, закоммитить .gitignore
+   - Повторить git status --porcelain
+   - Только когда вывод пуст — переходить к шагу 8
+
+   НЕЛЬЗЯ выводить финальное сообщение (шаг 8) при непустом git status.
+
   8. Вывести Living Docs Dashboard — обязательная таблица статуса документов.
 
      Для каждого документа из списка ниже:
@@ -172,6 +193,23 @@ POST-MERGE BACKPORT:
   2. Показать результат анализа пользователю
   3. Дождаться решения: "перенеси в framework" или "пропустить"
   4. Если подтверждено — выполнить backport в Vibe-Coding-Framework репо
+  ↓
+ОБЯЗАТЕЛЬНО: проверка чистоты working directory
+
+   ```bash
+   git status --porcelain
+   ```
+
+   Если вывод пуст — working directory чист, переходить к Living Docs Dashboard.
+
+   Если вывод НЕ пуст — есть файлы, не попавшие в коммит:
+   - Для каждого файла определить:
+     a) Относится к проекту (код, тесты, конфиги) — git add + коммит + push
+     b) Генерируемый артефакт (playwright-report/, test-results/, .next/, node_modules/, *.log) — добавить в .gitignore, закоммитить .gitignore
+   - Повторить git status --porcelain
+   - Только когда вывод пуст — переходить к Living Docs Dashboard
+
+   НЕЛЬЗЯ выводить финальное сообщение при непустом git status.
   ↓
 Living Docs Dashboard (обязательно после merge):
 
