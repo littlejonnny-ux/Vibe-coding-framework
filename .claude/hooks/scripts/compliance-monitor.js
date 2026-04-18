@@ -270,5 +270,43 @@ function runMain() {
     // Silent — never block
   }
 
+  checkE2EEnforcement();
+
   process.exit(0);
+}
+
+function checkE2EEnforcement() {
+  try {
+    const diffResult = runCommand('git diff HEAD~1..HEAD --name-only');
+    if (!diffResult.success || !diffResult.output) return;
+
+    const files = diffResult.output.split('\n').filter(Boolean);
+
+    const hasNewUI = files.some(f =>
+      (f.includes('features/') || f.includes('app/')) &&
+      (f.endsWith('.tsx') || f.endsWith('.ts')) &&
+      !f.includes('__tests__') &&
+      !f.includes('.test.') &&
+      !f.includes('.spec.')
+    );
+
+    const hasNewE2E = files.some(f => f.includes('.spec.ts'));
+
+    if (hasNewUI && !hasNewE2E) {
+      log('');
+      log('────────────────────────────────────────────────────────────────');
+      log('█  ⚠️  E2E ENFORCEMENT: UI-механика без теста!               █');
+      log('█                                                            █');
+      log('█  Обнаружены новые/изменённые UI-файлы (.tsx),              █');
+      log('█  но НЕТ новых/изменённых E2E-тестов (.spec.ts).           █');
+      log('█                                                            █');
+      log('█  ДЕЙСТВИЕ: напиши E2E-тест перед merge.                   █');
+      log('█  См. .claude/skills/e2e-testing/SKILL.md                   █');
+      log('█  Или вызови: /e2e                                         █');
+      log('────────────────────────────────────────────────────────────────');
+      log('');
+    }
+  } catch {
+    // Silent — never block
+  }
 }

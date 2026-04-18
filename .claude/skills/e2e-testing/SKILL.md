@@ -60,6 +60,7 @@ npx playwright install chromium
 
 ```
 src/__tests__/e2e/
+├── navigation.spec.ts        # ОБЯЗАТЕЛЬНЫЙ baseline: загрузка страниц, отсутствие 500-ошибок
 ├── auth.spec.ts              # Логин, роли, редиректы, смена пароля
 ├── [module].spec.ts          # По одному файлу на модуль (kpi-cards, participants, …)
 ├── negative.spec.ts          # Негативные сценарии (запреты, валидация)
@@ -142,6 +143,50 @@ test.describe('Module: описание группы', () => {
   });
 });
 ```
+
+---
+
+## Обязательный baseline: navigation.spec.ts
+
+Создаётся при инициализации E2E-тестирования в проекте. Проверяет что ключевые маршруты загружаются без 500-ошибок.
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth.helper';
+
+test.describe('Navigation baseline', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAs(page, 'admin');
+  });
+
+  const routes = [
+    { path: '/dashboard', name: 'Dashboard' },
+    { path: '/settings',  name: 'Settings' },
+  ];
+
+  for (const { path, name } of routes) {
+    test(`${name} — страница загружается без ошибок`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on('response', res => {
+        if (res.status() >= 500) errors.push(`${res.status()} ${res.url()}`);
+      });
+
+      await page.goto(path);
+      await expect(page).not.toHaveTitle(/error/i);
+      expect(errors).toHaveLength(0);
+    });
+  }
+});
+```
+
+### Когда обновлять
+
+- Добавить маршрут в `routes` массив при появлении новой страницы в приложении
+- Обновить роль в `loginAs` если маршрут требует другой роли
+
+### Почему обязателен
+
+Гарантирует минимальный smoke-coverage: CI не пропустит регрессию когда добавляются новые фичи без E2E-тестов. `e2e-coverage-check` job в CI проверяет наличие хотя бы одного `.spec.ts` — `navigation.spec.ts` закрывает этот gate.
 
 ---
 
