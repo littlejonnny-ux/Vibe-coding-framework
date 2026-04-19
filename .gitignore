@@ -141,3 +141,6 @@ vite.config.ts.timestamp-*
 # Claude Code session files
 .claude/sessions/*.tmp
 .claude/sessions/compaction-log.txt
+
+# Claude Code session logs
+.claude/sessions/
