@@ -236,6 +236,7 @@ jobs:
 - STANDARD: CI информационный — Claude Code мёржит через `gh pr merge` независимо от CI
 - ENTERPRISE: CI обязателен — настроить branch protection, merge только при зелёном CI
 - Файл `.github/workflows/ci.yml` включается в первый коммит проекта
+- При инициализации STANDARD+ проекта также создаётся `scripts/vkf-compliance-gate.js` (копируется из VKF `.claude/blueprints/vkf-compliance-gate.js`) и `.vkfignore` в корне
 
 ### E2E jobs шаблон (добавляется когда появляются первые E2E-тесты)
 
@@ -289,6 +290,38 @@ jobs:
 - `e2e-coverage-check` job: блокирует merge если в `e2e/` нет ни одного `.spec.ts`
 - STANDARD: оба job-а добавляются при появлении первого E2E-теста
 - ENTERPRISE: `e2e` job переводится в `continue-on-error: false` (тесты должны быть зелёными)
+
+### VKF Compliance Gate шаблон
+
+Добавляется одновременно с первой E2E-инфраструктурой. Блокирует merge если VKF-процесс не выполнен (нет теста для нового модуля, не обновлены живые документы и т.д.).
+
+Скрипт `scripts/vkf-compliance-gate.js` в корне проекта. Файл-исключений `.vkfignore` в корне.
+
+Escape hatch:
+- `[skip-vkf-gate]` в commit message — разовый пропуск
+- `.vkfignore` — постоянное исключение модуля
+
+```yaml
+  vkf-compliance-gate:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run VKF Compliance Gate
+        run: node scripts/vkf-compliance-gate.js
+```
+
+### Правило перевода `e2e` job из informational в blocking
+
+- **STANDARD (начальная фаза):** `e2e` с `continue-on-error: true`. Тесты есть, но падение не блокирует.
+- **STANDARD (после стабилизации — ≥3 зелёных прогонов подряд):** `continue-on-error: false`. Merge блокируется при падении E2E.
+- **ENTERPRISE:** всегда `continue-on-error: false`.
 
 ---
 
