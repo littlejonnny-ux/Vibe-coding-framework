@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-'use strict';
 
-const { spawnSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ROOT = process.cwd();
 
@@ -17,10 +20,6 @@ function git(...args) {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   return result.status === 0 ? (result.stdout || '').trim() : '';
-}
-
-function fileExists(relPath) {
-  return fs.existsSync(path.join(ROOT, relPath));
 }
 
 // ─── Escape hatch: [skip-vkf-gate] ────────────────────────────────────────────
