@@ -74,11 +74,15 @@
 После каждого compaction (autocompact или ручного /compact) — ОБЯЗАТЕЛЬНО перечитай:
 1. `.claude/workflow/CYCLE.md` — полный цикл задачи, post-merge шаги, Living Docs Dashboard
 2. `.claude/workflow/TRIGGER_MAP.md` — все триггеры активации skills/agents/commands
-3. `.claude/skills/e2e-testing/SKILL.md` — трёхуровневая схема E2E, счётчик, шаблоны
-4. `.claude/workflow/RETROSPECTIVE.md` — 5 шагов ретроспективы
+3. `.claude/workflow/LEARNED_OVERRIDES.md` — маркеры, переопределяющие триггеры
+4. `.claude/workflow/LEARNED_PATTERNS.md` — технические паттерны, дополняющие реализацию
+5. `.claude/skills/e2e-testing/SKILL.md` — трёхуровневая схема E2E, счётчик, шаблоны
+6. `.claude/workflow/RETROSPECTIVE.md` — 5 шагов ретроспективы
 
-Эти документы содержат критические развилки процесса, которые теряются при сжатии контекста.
-Без перечитывания — высокий риск пропуска post-merge шагов (update-docs, ретроспектива, E2E).
+Эти документы содержат критические развилки процесса и накопленные маркеры обучения,
+которые теряются при сжатии контекста. Без перечитывания LEARNED_OVERRIDES — риск
+избыточной активации агентов вопреки накопленным правилам. Без перечитывания других —
+высокий риск пропуска post-merge шагов (update-docs, ретроспектива, E2E).
 
 ## Активированные механизмы
 [Список skills, agents, commands, plugins — из tier-матрицы SKILLS_AND_AGENTS.md]
@@ -271,9 +275,9 @@ jobs:
       - run: npm ci
       - name: Check E2E test exists
         run: |
-          count=$(find e2e -name "*.spec.ts" 2>/dev/null | wc -l)
+          count=$(find src/__tests__/e2e -name "*.spec.ts" 2>/dev/null | wc -l)
           if [ "$count" -eq "0" ]; then
-            echo "❌ No E2E tests found. Add at least navigation.spec.ts."
+            echo "❌ No E2E tests found. Add at least navigation.spec.ts in src/__tests__/e2e/."
             exit 1
           fi
           echo "✅ E2E tests present: $count spec files"
