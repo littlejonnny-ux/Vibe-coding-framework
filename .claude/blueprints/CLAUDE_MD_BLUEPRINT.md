@@ -119,6 +119,29 @@ src/
 адаптированный под конкретный стек проекта: инструменты интроспекции, выполнения SQL,
 формат connection string]
 
+### Workflow создания миграций (Supabase)
+
+1. Создать файл миграции: `npx supabase migration new <name>`
+2. Написать SQL в созданном файле `supabase/migrations/YYYYMMDDHHMMSS_<name>.sql`
+3. Проверить безопасность: `node scripts/migration-safety-analyzer.mjs`
+4. Локальный push с dry-run: `npx supabase db push --dry-run`
+5. После ревью: `npx supabase db push`
+
+### Escape-hatch маркеры (добавлять в commit message или PR body)
+
+| Маркер | Когда использовать |
+|--------|-------------------|
+| `[explicit-data-loss: reason]` | DROP TABLE, TRUNCATE, DELETE без WHERE — + создать backup в `supabase/backups/YYYY-MM-DD-HHMMSS.sql` |
+| `[column-unused: reason]` | DROP COLUMN, DROP CONSTRAINT на неиспользуемых объектах |
+| `[type-compatible: reason]` | ALTER COLUMN TYPE, SET NOT NULL, ADD UNIQUE |
+| `[rls-reviewed: reason]` | ENABLE/DISABLE RLS, CREATE/DROP/ALTER POLICY |
+
+### Запрещено (никогда без явного запроса пользователя)
+
+- `npx supabase db reset` — удаляет всю локальную БД
+- `npx supabase db execute` — выполняет произвольный SQL в обход миграций
+- `psql` — прямое подключение к БД
+
 ## Build & Dev
 ```bash
 [команды установки, запуска, сборки]
