@@ -259,6 +259,29 @@ if (classified.dbMigrationFiles.length > 0) {
   }
 }
 
+// Check 6: запуск migration-safety-analyzer для файлов миграций
+if (classified.dbMigrationFiles.length > 0) {
+  checksCount++;
+  const analyzerPath = path.join(__dirname, 'migration-safety-analyzer.mjs');
+  if (fs.existsSync(analyzerPath)) {
+    const analyzerResult = spawnSync('node', [analyzerPath], {
+      encoding: 'utf8',
+      timeout: 30000,
+      cwd: ROOT,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: 10 * 1024 * 1024,
+    });
+    if (analyzerResult.status !== 0) {
+      const output = (analyzerResult.stdout || '') + (analyzerResult.stderr || '');
+      violations.push({
+        title: 'Migration Safety Analyzer: BLOCK',
+        files: classified.dbMigrationFiles,
+        what: output.trim() || 'Опасные операции в миграции. Запусти node scripts/migration-safety-analyzer.mjs для деталей.',
+      });
+    }
+  }
+}
+
 // ─── Output ───────────────────────────────────────────────────────────────────
 
 const prType = getPrTypeLabel(classified);
