@@ -23,10 +23,16 @@ function git(...args) {
 }
 
 // ─── Escape hatch: [skip-vkf-gate] ────────────────────────────────────────────
+// In GitHub Actions, `git log -1` returns the synthetic merge commit, not the
+// PR commit. So we also scan all commits in the PR range (origin/main..HEAD).
 
 const lastCommitMsg = git('log', '-1', '--pretty=%B');
-if (lastCommitMsg.includes('[skip-vkf-gate]')) {
-  console.log('⏭  VKF Compliance Gate: пропущен ([skip-vkf-gate] в последнем коммите).');
+const prCommitMsgs = git('log', 'origin/main..HEAD', '--pretty=%B')
+  || git('log', 'main..HEAD', '--pretty=%B');
+const allCommitMsgs = lastCommitMsg + '\n' + prCommitMsgs;
+
+if (allCommitMsgs.includes('[skip-vkf-gate]')) {
+  console.log('⏭  VKF Compliance Gate: пропущен ([skip-vkf-gate] в коммите PR).');
   process.exit(0);
 }
 

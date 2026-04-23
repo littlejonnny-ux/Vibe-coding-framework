@@ -119,6 +119,13 @@ src/
 адаптированный под конкретный стек проекта: инструменты интроспекции, выполнения SQL,
 формат connection string]
 
+### Соглашение об именовании миграций
+
+Файлы ДОЛЖНЫ соответствовать шаблону: `<timestamp>_<name>.sql`
+- Формат timestamp: `YYYYMMDDHHMMSS` (14 цифр)
+- `npx supabase migration new <name>` генерирует правильное имя автоматически
+- Файлы с неправильным именем молча пропускаются CLI без ошибки
+
 ### Workflow создания миграций (Supabase)
 
 1. Создать файл миграции: `npx supabase migration new <name>`
@@ -126,6 +133,25 @@ src/
 3. Проверить безопасность: `node scripts/migration-safety-analyzer.mjs`
 4. Локальный push с dry-run: `npx supabase db push --dry-run`
 5. После ревью: `npx supabase db push`
+
+### Baseline и repair
+
+При запуске локального отслеживания миграций на проекте с историей:
+
+```bash
+# Создать baseline-маркер (представляет состояние схемы до локального трекинга):
+npx supabase migration new baseline_schema  # → 20XXXXXXXXXXXXXX_baseline_schema.sql
+
+# Пометить baseline и существующую миграцию как применённые:
+npx supabase migration repair --status applied 20XXXXXXXXXXXXXX
+
+# Orphaned remote migrations (без локальных файлов) убрать из трекинга:
+npx supabase migration repair --status reverted <ts1> <ts2> ...
+
+# Проверить результат:
+npx supabase migration list          # Local == Remote для всех актуальных
+npx supabase db push --dry-run       # → "Remote database is up to date"
+```
 
 ### Escape-hatch маркеры (добавлять в commit message или PR body)
 

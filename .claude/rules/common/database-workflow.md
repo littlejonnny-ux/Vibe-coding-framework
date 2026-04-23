@@ -87,6 +87,26 @@ Every schema migration MUST have a corresponding rollback plan.
 - **Direct auth schema changes** — prohibited (use Auth API or Dashboard only)
 - **Dynamic EXECUTE in plpgsql** (variable, concatenation, `format()`) — blocked by `migration-safety-analyzer.mjs`; unlock with `[execute-reviewed: reason]` escape-hatch marker
 
+## Migration File Naming
+
+Migration files MUST match pattern: `<timestamp>_<name>.sql`
+- Timestamp format: `YYYYMMDDHHMMSS` (14 digits)
+- Example: `20260419010000_participants_bulk_import.sql`
+- `npx supabase migration new <name>` generates correct name automatically
+- Files with incorrect naming are silently skipped by the CLI — no error
+
+## Migration Baseline Setup
+
+When establishing local migration tracking on a project with existing remote history:
+
+1. Create a baseline marker file: `npx supabase migration new baseline_schema`
+2. Add a comment-only SQL body explaining what the baseline covers
+3. Mark it applied: `npx supabase migration repair --status applied <timestamp>`
+4. Mark orphaned remote-only historical migrations as reverted:
+   `npx supabase migration repair --status reverted <ts1> <ts2> ...`
+5. Verify: `npx supabase migration list` — Local=Remote for all active
+6. Confirm: `npx supabase db push --dry-run` → "Remote database is up to date"
+
 ## If Something Goes Wrong
 
 If SQL executed but verification shows unexpected result — STOP and report to user. Do not attempt to fix independently. This is the only case requiring user intervention.
