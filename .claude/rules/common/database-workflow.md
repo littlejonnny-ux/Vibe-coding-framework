@@ -107,6 +107,39 @@ When establishing local migration tracking on a project with existing remote his
 5. Verify: `npx supabase migration list` — Local=Remote for all active
 6. Confirm: `npx supabase db push --dry-run` → "Remote database is up to date"
 
+### Method 2: pg_dump via Session Pooler (без Docker Desktop)
+
+Стандартная команда `npx supabase db dump` требует Docker Desktop. Альтернатива — прямой `pg_dump` через Session Pooler:
+
+```bash
+pg_dump "postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres" \
+  --schema=public \
+  --schema-only \
+  --no-owner \
+  --no-privileges \
+  -f supabase/migrations/20260101000000_baseline_schema.sql
+```
+
+**Важно: Session Pooler добавляет нестандартные маркеры** в начало и конец файла:
+```
+\restrict <token>
+...schema DDL...
+\unrestrict <token>
+```
+Это не SQL и не pg_dump директивы — артефакт пулера. **Удалить обе строки перед коммитом**, иначе `supabase db push` завершится с ошибкой.
+
+**Escape-hatch маркеры** — pg_dump baseline содержит EXECUTE внутри функций, ADD UNIQUE constraints и RLS policies. В commit message И PR body нужны все три:
+```
+[execute-reviewed: pg_dump DDL — EXECUTE inside CREATE FUNCTION bodies, not user-supplied SQL]
+[type-compatible: pg_dump DDL — ADD UNIQUE reflects existing production schema, no duplicates]
+[rls-reviewed: pg_dump DDL — RLS policies are snapshot of existing production config]
+[skip-vkf-gate]
+```
+
+> **Критично:** `[skip-vkf-gate]` — точный токен без двоеточия. Скрипт проверяет `.includes('[skip-vkf-gate]')` — с закрывающей скобкой сразу после имени. `[skip-vkf-gate: reason]` **не совпадает**.
+
+> **Критично:** `migration-safety-analyzer.mjs` в CI читает маркеры из PR body (`getPrBodyMarkers()` через `GITHUB_EVENT_PATH`), потому что `git log -1` возвращает synthetic merge commit. Маркеры **должны быть в PR body**, не только в commit message.
+
 ## CI Workflow Changes (Supabase secrets, e2e env)
 
 When `.github/workflows/*.yml` needs editing (e.g. adding Supabase secrets to the e2e job),
