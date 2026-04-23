@@ -68,6 +68,7 @@
 3. `TECHNICAL_SPECIFICATION.md` — бизнес-логика, формулы, роли
 4. `UI_PATTERNS.md` — принятые UI-решения (если UI-проект)
 5. `PROJECT_CONTEXT.md` — карта файлов, текущий статус
+6. `.claude/rules/common/escalate-infra.md` — механизм временных разрешений
 
 ## После compaction
 
@@ -78,6 +79,7 @@
 4. `.claude/workflow/LEARNED_PATTERNS.md` — технические паттерны, дополняющие реализацию
 5. `.claude/skills/e2e-testing/SKILL.md` — трёхуровневая схема E2E, счётчик, шаблоны
 6. `.claude/workflow/RETROSPECTIVE.md` — 5 шагов ретроспективы
+7. `.claude/rules/common/escalate-infra.md` — понимание механизма [escalate-infra] маркеров
 
 Эти документы содержат критические развилки процесса и накопленные маркеры обучения,
 которые теряются при сжатии контекста. Без перечитывания LEARNED_OVERRIDES — риск
@@ -319,8 +321,16 @@ jobs:
       - name: Run E2E tests
         run: npx playwright test
         env:
+          CI: true
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          TEST_APPROVER_EMAIL: ${{ secrets.TEST_APPROVER_EMAIL }}
+          TEST_APPROVER_PASSWORD: ${{ secrets.TEST_APPROVER_PASSWORD }}
+          TEST_PARTICIPANT_EMAIL: ${{ secrets.TEST_PARTICIPANT_EMAIL }}
+          TEST_PARTICIPANT_PASSWORD: ${{ secrets.TEST_PARTICIPANT_PASSWORD }}
 
   e2e-coverage-check:
     runs-on: ubuntu-latest
