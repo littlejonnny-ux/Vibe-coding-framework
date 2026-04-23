@@ -95,6 +95,15 @@ Migration files MUST match pattern: `<timestamp>_<name>.sql`
 - `npx supabase migration new <name>` generates correct name automatically
 - Files with incorrect naming are silently skipped by the CLI — no error
 
+### Naming convention (enforced by migration-safety-analyzer)
+
+Files in `supabase/migrations/` must match `^\d{14}_[a-z][a-z0-9_]*\.sql$`:
+- 14-digit timestamp (YYYYMMDDHHMMSS)
+- Underscore separator
+- snake_case description (lowercase letters and digits only)
+
+Invalid names (hyphens, short timestamps, uppercase) are blocked before content analysis. Always create migration files via `npx supabase migration new <description>` — manual creation with arbitrary names is blocked by CI.
+
 ## Migration Baseline Setup
 
 When establishing local migration tracking on a project with existing remote history:

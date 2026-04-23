@@ -83,6 +83,14 @@ function getDbReviewerVerdict() {
   }
 }
 
+// ─── Migration filename validation ───────────────────────────────────────────
+
+const MIGRATION_FILENAME_RE = /^\d{14}_[a-z][a-z0-9_]*\.sql$/;
+
+function checkMigrationFilename(filename) {
+  return MIGRATION_FILENAME_RE.test(filename);
+}
+
 // ─── SQL pre-processing ───────────────────────────────────────────────────────
 
 function stripSqlCommentsAndLiterals(sql) {
@@ -230,7 +238,23 @@ function executeReviewerOverride(dbReviewerVerdict) {
 
 // ─── Analysis ─────────────────────────────────────────────────────────────────
 
-function analyzeMigration(filePath, markers, dbReviewerVerdict) {
+function analyzeMigration(filePath, markers, dbReviewerVerdict, filenameOverride = null) {
+  // Filename validation — skip only for __tests__/ fixtures without an explicit override
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  const isTestFixture = normalizedPath.includes('__tests__/');
+  if (!isTestFixture || filenameOverride !== null) {
+    const nameToCheck = filenameOverride || path.basename(filePath);
+    if (!checkMigrationFilename(nameToCheck)) {
+      return {
+        file: filePath,
+        findings: [{
+          level: 'BLOCK',
+          message: `Invalid migration filename: "${nameToCheck}". Expected: YYYYMMDDHHMMSS_snake_case.sql (e.g. 20260419010000_add_users_table.sql). Use \`npx supabase migration new <name>\` to generate correct name.`,
+        }],
+      };
+    }
+  }
+
   const absPath = path.join(ROOT, filePath);
   if (!fs.existsSync(absPath)) {
     return { file: filePath, findings: [{ level: 'WARN', message: 'File not found — skipped.' }] };
@@ -329,6 +353,10 @@ function main() {
       }
     }
 
+    // --filename <name>: override the filename used for name validation (smoke test use only)
+    const filenameArgIdx = process.argv.indexOf('--filename');
+    const filenameOverride = filenameArgIdx !== -1 ? process.argv[filenameArgIdx + 1] : null;
+
     // --no-git-markers: disable reading markers from git/PR (used in smoke tests)
     const noGitMarkers = process.argv.includes('--no-git-markers');
     const commitMarkers = noGitMarkers ? parseMarkers('') : getCommitMarkers();
@@ -346,7 +374,7 @@ function main() {
     const absFilePath = path.isAbsolute(filePath) ? filePath : path.join(ROOT, filePath);
     const relPath = path.relative(ROOT, absFilePath).replace(/\\/g, '/');
 
-    const { findings } = analyzeMigration(relPath, markers, dbReviewerVerdict);
+    const { findings } = analyzeMigration(relPath, markers, dbReviewerVerdict, filenameOverride);
     const worst = findings.reduce((acc, f) => {
       if (f.level === 'BLOCK') return 'BLOCK';
       if (f.level === 'WARN' && acc !== 'BLOCK') return 'WARN';
