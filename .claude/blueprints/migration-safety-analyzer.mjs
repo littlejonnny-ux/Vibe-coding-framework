@@ -11,6 +11,7 @@
  *   [column-unused: reason]       — acknowledges DROP COLUMN on unused column
  *   [type-compatible: reason]     — acknowledges ALTER COLUMN TYPE
  *   [rls-reviewed: reason]        — acknowledges RLS/POLICY change
+ *   [execute-reviewed: reason]    — acknowledges dynamic EXECUTE in plpgsql
  */
 
 import { spawnSync } from 'node:child_process';
@@ -44,6 +45,7 @@ function parseMarkers(text) {
     columnUnused:     /\[column-unused\s*:/i.test(text),
     typeCompatible:   /\[type-compatible\s*:/i.test(text),
     rlsReviewed:      /\[rls-reviewed\s*:/i.test(text),
+    executeReviewed:  /\[execute-reviewed\s*:/i.test(text),
   };
 }
 
@@ -102,6 +104,53 @@ function stripSqlCommentsAndLiterals(sql) {
   result = result.replace(/--[^\n]*/g, ' ');
 
   return result;
+}
+
+// ─── Extract plpgsql bodies from dollar-quoted blocks ────────────────────────
+// Must run on RAW sql (before stripSqlCommentsAndLiterals replaces $$ with '')
+
+function extractPlpgsqlBodies(rawSql) {
+  const bodies = [];
+  // Match $tag$...$tag$ (including $$...$$)
+  const re = /\$([^$\s]*)\$([\s\S]*?)\$\1\$/g;
+  let match;
+  while ((match = re.exec(rawSql)) !== null) {
+    bodies.push(match[2]);
+  }
+  return bodies;
+}
+
+// Detect dangerous EXECUTE patterns inside plpgsql bodies:
+//   EXECUTE variable;
+//   EXECUTE 'literal' || expr
+//   EXECUTE format(...)
+// Returns true if a suspicious EXECUTE is found.
+function hasDangerousExecute(bodies) {
+  for (const body of bodies) {
+    // Strip line comments inside body first (simple pass)
+    const cleaned = body.replace(/--[^\n]*/g, ' ');
+
+    // Match EXECUTE followed by any expression (no lookahead — check statically after capture)
+    const execRe = /\bEXECUTE\s+(\S[^\n;]*)/gi;
+    let m;
+    while ((m = execRe.exec(cleaned)) !== null) {
+      const expr = m[1].trimEnd();
+
+      // Safe: EXECUTE 'static string' with no concatenation (handles PostgreSQL '' escapes)
+      const isStaticLiteral = /^'(?:''|[^'])*'\s*(?:INTO\s+\S+)?\s*;?\s*$/.test(expr);
+      if (isStaticLiteral) continue;
+
+      // Dangerous: concatenation, format(), or bare identifier (dynamic variable)
+      const isDangerous =
+        expr.includes('||') ||
+        /\bformat\s*\(/.test(expr) ||
+        // bare identifier at start — dynamic variable (not a quoted string)
+        /^[a-z_]\w*/i.test(expr);
+
+      if (isDangerous) return true;
+    }
+  }
+  return false;
 }
 
 // ─── Level 1: Hard blocks ─────────────────────────────────────────────────────
@@ -171,7 +220,13 @@ const L2_PATTERNS = [
     marker:  'rlsReviewed',
     dbReviewerOverride: true,
   },
+  // Note: EXECUTE detection is handled separately via extractPlpgsqlBodies + hasDangerousExecute
+  // because it requires analyzing raw dollar-quoted blocks before stripping.
 ];
+
+function executeReviewerOverride(dbReviewerVerdict) {
+  return dbReviewerVerdict === 'APPROVED';
+}
 
 // ─── Analysis ─────────────────────────────────────────────────────────────────
 
@@ -182,6 +237,7 @@ function analyzeMigration(filePath, markers, dbReviewerVerdict) {
   }
 
   const raw = fs.readFileSync(absPath, 'utf8');
+  const plpgsqlBodies = extractPlpgsqlBodies(raw);
   const sql = stripSqlCommentsAndLiterals(raw);
   const findings = [];
 
@@ -232,6 +288,16 @@ function analyzeMigration(filePath, markers, dbReviewerVerdict) {
     }
   }
 
+  // EXECUTE dynamic SQL detection (plpgsql bodies)
+  if (plpgsqlBodies.length > 0 && hasDangerousExecute(plpgsqlBodies)) {
+    const executeMarkerPresent = markers.executeReviewed || markers.rlsReviewed;
+    if (executeReviewerOverride(dbReviewerVerdict) || executeMarkerPresent) {
+      findings.push({ level: 'WARN', message: 'Dynamic EXECUTE detected in plpgsql. Marker present or DB-reviewer APPROVED.' });
+    } else {
+      findings.push({ level: 'BLOCK', message: 'Dynamic EXECUTE (variable/concatenation/format) in plpgsql — SQL injection risk. Add marker [execute-reviewed: reason] to commit message or PR body.' });
+    }
+  }
+
   if (findings.length === 0) {
     findings.push({ level: 'PASS', message: 'No dangerous patterns detected.' });
   }
@@ -242,6 +308,71 @@ function analyzeMigration(filePath, markers, dbReviewerVerdict) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 function main() {
+  // --file <path> flag: analyze a single file directly (used by smoke tests)
+  // Optional: --markers '{"executeReviewed":true}' to inject markers without git
+  const fileArgIdx = process.argv.indexOf('--file');
+  if (fileArgIdx !== -1) {
+    const filePath = process.argv[fileArgIdx + 1];
+    if (!filePath) {
+      console.error('Usage: --file <path-to-sql-file> [--markers <json>]');
+      process.exit(2);
+    }
+
+    const markersArgIdx = process.argv.indexOf('--markers');
+    let injectedMarkers = {};
+    if (markersArgIdx !== -1) {
+      try {
+        injectedMarkers = JSON.parse(process.argv[markersArgIdx + 1]);
+      } catch {
+        console.error('--markers must be valid JSON');
+        process.exit(2);
+      }
+    }
+
+    // --no-git-markers: disable reading markers from git/PR (used in smoke tests)
+    const noGitMarkers = process.argv.includes('--no-git-markers');
+    const commitMarkers = noGitMarkers ? parseMarkers('') : getCommitMarkers();
+    const prBodyMarkers = noGitMarkers ? parseMarkers('') : getPrBodyMarkers();
+    const markers = {
+      explicitDataLoss: injectedMarkers.explicitDataLoss || commitMarkers.explicitDataLoss || prBodyMarkers.explicitDataLoss,
+      columnUnused:     injectedMarkers.columnUnused     || commitMarkers.columnUnused     || prBodyMarkers.columnUnused,
+      typeCompatible:   injectedMarkers.typeCompatible   || commitMarkers.typeCompatible   || prBodyMarkers.typeCompatible,
+      rlsReviewed:      injectedMarkers.rlsReviewed      || commitMarkers.rlsReviewed      || prBodyMarkers.rlsReviewed,
+      executeReviewed:  injectedMarkers.executeReviewed  || commitMarkers.executeReviewed  || prBodyMarkers.executeReviewed,
+    };
+    const dbReviewerVerdict = getDbReviewerVerdict();
+
+    // Resolve relative to ROOT so the file path works from cwd
+    const absFilePath = path.isAbsolute(filePath) ? filePath : path.join(ROOT, filePath);
+    const relPath = path.relative(ROOT, absFilePath).replace(/\\/g, '/');
+
+    const { findings } = analyzeMigration(relPath, markers, dbReviewerVerdict);
+    const worst = findings.reduce((acc, f) => {
+      if (f.level === 'BLOCK') return 'BLOCK';
+      if (f.level === 'WARN' && acc !== 'BLOCK') return 'WARN';
+      return acc;
+    }, 'PASS');
+
+    const icon = worst === 'BLOCK' ? '✗' : worst === 'WARN' ? '⚠' : '✓';
+    console.log(`\n${icon} ${relPath}`);
+    for (const f of findings) {
+      const findingIcon = f.level === 'BLOCK' ? '  ✗' : f.level === 'WARN' ? '  ⚠' : '  ✓';
+      console.log(`${findingIcon} ${f.message}`);
+    }
+    console.log('');
+
+    if (worst === 'BLOCK') {
+      console.log('❌ Migration Safety Analyzer: BLOCK');
+      process.exit(1);
+    } else if (worst === 'WARN') {
+      console.log('⚠  Migration Safety Analyzer: WARN');
+      process.exit(0);
+    } else {
+      console.log('✅ Migration Safety Analyzer: PASS');
+      process.exit(0);
+    }
+  }
+
   // Detect changed migration files
   let diffOutput = git('diff', '--name-only', 'origin/main...HEAD');
   if (!diffOutput) diffOutput = git('diff', '--name-only', 'main...HEAD');
@@ -264,6 +395,7 @@ function main() {
     columnUnused:     commitMarkers.columnUnused     || prBodyMarkers.columnUnused,
     typeCompatible:   commitMarkers.typeCompatible   || prBodyMarkers.typeCompatible,
     rlsReviewed:      commitMarkers.rlsReviewed      || prBodyMarkers.rlsReviewed,
+    executeReviewed:  commitMarkers.executeReviewed  || prBodyMarkers.executeReviewed,
   };
   const dbReviewerVerdict = getDbReviewerVerdict();
 
@@ -302,6 +434,7 @@ function main() {
     console.log('     [column-unused: reason]        — for DROP COLUMN / DROP CONSTRAINT');
     console.log('     [type-compatible: reason]      — for ALTER TYPE / SET NOT NULL / ADD UNIQUE');
     console.log('     [rls-reviewed: reason]         — for RLS/POLICY changes');
+    console.log('     [execute-reviewed: reason]     — for dynamic EXECUTE in plpgsql');
     process.exit(1);
   } else if (hasWarn) {
     console.log('⚠  Migration Safety Analyzer: WARN — review findings above before merge.');

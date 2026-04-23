@@ -135,12 +135,22 @@ src/
 | `[column-unused: reason]` | DROP COLUMN, DROP CONSTRAINT на неиспользуемых объектах |
 | `[type-compatible: reason]` | ALTER COLUMN TYPE, SET NOT NULL, ADD UNIQUE |
 | `[rls-reviewed: reason]` | ENABLE/DISABLE RLS, CREATE/DROP/ALTER POLICY |
+| `[execute-reviewed: reason]` | EXECUTE с динамическим SQL (переменная, конкатенация, format()) в plpgsql |
 
 ### Запрещено (никогда без явного запроса пользователя)
 
 - `npx supabase db reset` — удаляет всю локальную БД
 - `npx supabase db execute` — выполняет произвольный SQL в обход миграций
 - `psql` — прямое подключение к БД
+
+## Ограничения CCVS (fail-safes)
+
+- Правка `.github/workflows/*` — запрещена через `settings.local.json`. Нужна? Делает пользователь вручную в VS Code.
+- `supabase db reset`, `db execute`, прямой `psql` — запрещены deny-списком.
+- `db push` — требует явного разрешения пользователя на каждую сессию.
+- `DROP TABLE`, `TRUNCATE`, `DELETE` без `WHERE` — блокируются `migration-safety-analyzer.mjs` (L1, hard block).
+- `EXECUTE` с динамическим SQL в plpgsql — блокируется (L2, разблокируется маркером `[execute-reviewed]`).
+- Если `migration-safety-analyzer.mjs` недоступен или упал с ошибкой — `vkf-compliance-gate.mjs` блокирует merge (fail-closed).
 
 ## Build & Dev
 ```bash

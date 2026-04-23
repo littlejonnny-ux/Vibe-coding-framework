@@ -85,6 +85,7 @@ Every schema migration MUST have a corresponding rollback plan.
 - **DROP COLUMN** with dependent data without prior migration — prohibited
 - **SQL based on documentation** instead of actual schema — prohibited
 - **Direct auth schema changes** — prohibited (use Auth API or Dashboard only)
+- **Dynamic EXECUTE in plpgsql** (variable, concatenation, `format()`) — blocked by `migration-safety-analyzer.mjs`; unlock with `[execute-reviewed: reason]` escape-hatch marker
 
 ## If Something Goes Wrong
 
