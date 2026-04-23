@@ -107,6 +107,11 @@ When establishing local migration tracking on a project with existing remote his
 5. Verify: `npx supabase migration list` — Local=Remote for all active
 6. Confirm: `npx supabase db push --dry-run` → "Remote database is up to date"
 
+## CI Workflow Changes (Supabase secrets, e2e env)
+
+When `.github/workflows/*.yml` needs editing (e.g. adding Supabase secrets to the e2e job),
+use the `[escalate-infra]` mechanism — see `rules/common/escalate-infra.md`.
+
 ## If Something Goes Wrong
 
 If SQL executed but verification shows unexpected result — STOP and report to user. Do not attempt to fix independently. This is the only case requiring user intervention.
