@@ -112,7 +112,7 @@ function classifyFiles(files) {
       result.businessLogicFiles.push(f);
     } else if (
       f.startsWith('supabase/migrations/') ||
-      (f.endsWith('.sql') && !f.startsWith('supabase/rollbacks/'))
+      (f.endsWith('.sql') && !f.startsWith('supabase/rollbacks/') && !f.startsWith('scripts/'))
     ) {
       result.dbMigrationFiles.push(f);
     } else if (f.endsWith('.spec.ts') || f.endsWith('.test.ts')) {
@@ -271,14 +271,33 @@ if (classified.dbMigrationFiles.length > 0) {
       stdio: ['ignore', 'pipe', 'pipe'],
       maxBuffer: 10 * 1024 * 1024,
     });
-    if (analyzerResult.status !== 0) {
-      const output = (analyzerResult.stdout || '') + (analyzerResult.stderr || '');
+
+    const output = (analyzerResult.stdout || '') + (analyzerResult.stderr || '');
+    const isCrash = !!analyzerResult.error;
+    const hasErrorString = /(?:Error:|TypeError:|SyntaxError:|ReferenceError:)/m.test(output);
+
+    if (isCrash || hasErrorString) {
+      // Analyzer crashed or threw an unexpected exception — fail-closed
+      violations.push({
+        title: 'Migration Safety Analyzer: CRASH (fail-closed)',
+        files: classified.dbMigrationFiles,
+        what: `Analyzer завершился с ошибкой: ${analyzerResult.error?.message || output.trim() || 'unknown error'}. Merge заблокирован — исправь analyzer или запусти вручную: node scripts/migration-safety-analyzer.mjs`,
+      });
+    } else if (analyzerResult.status !== 0) {
+      // Analyzer detected dangerous patterns — normal BLOCK
       violations.push({
         title: 'Migration Safety Analyzer: BLOCK',
         files: classified.dbMigrationFiles,
         what: output.trim() || 'Опасные операции в миграции. Запусти node scripts/migration-safety-analyzer.mjs для деталей.',
       });
     }
+  } else {
+    // Analyzer script missing — fail-closed
+    violations.push({
+      title: 'Migration Safety Analyzer: MISSING (fail-closed)',
+      files: classified.dbMigrationFiles,
+      what: `Файл scripts/migration-safety-analyzer.mjs не найден. Merge заблокирован. Восстанови файл из git.`,
+    });
   }
 }
 
